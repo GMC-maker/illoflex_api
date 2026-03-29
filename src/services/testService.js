@@ -5,6 +5,22 @@
 const { v4: uuidv4 } = require("uuid");
 const testModel = require("../models/testModel");
 
+const getTestByUuid = async (uuid) => {
+	// Recupera la informacion minima necesaria para continuar el flujo del test.
+	const vocationalTest = await testModel.getTestByUuid(uuid);
+
+	if (!vocationalTest) {
+		return null;
+	}
+
+	return {
+		uuid: vocationalTest.uuid,
+		estado: vocationalTest.estado,
+		fecha_creacion: vocationalTest.fecha_creacion,
+		fecha_finalizacion: vocationalTest.fecha_finalizacion,
+	};
+};
+
 const createAnonymousTest = async () => {
 	// Cada intento del test se identifica con un UUID unico y anonimo.
 	const uuid = uuidv4();
@@ -18,5 +34,6 @@ const createAnonymousTest = async () => {
 };
 
 module.exports = {
+	getTestByUuid,
 	createAnonymousTest,
 };

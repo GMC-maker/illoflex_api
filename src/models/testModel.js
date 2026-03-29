@@ -52,7 +52,15 @@ const createAnonymousTest = async (uuid) => {
 	});
 };
 
+const getTestByUuid = async (uuid) => {
+	// Busca el test por su UUID para no exponer el identificador interno de la BD.
+	return Test.findOne({
+		where: { uuid },
+	});
+};
+
 module.exports = {
 	Test,
+	getTestByUuid,
 	createAnonymousTest,
 };

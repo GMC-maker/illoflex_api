@@ -7,6 +7,9 @@ const testController = require("../controllers/testController");
 
 const router = express.Router();
 
+// Recupera un test anonimo existente a partir de su UUID.
+router.get("/:uuid", testController.getTestByUuid);
+
 // Crea un nuevo test anonimo y devuelve su UUID.
 router.post("/", testController.createAnonymousTest);
 

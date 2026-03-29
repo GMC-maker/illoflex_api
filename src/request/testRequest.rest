@@ -1,0 +1,11 @@
+### Estado base de la API
+GET http://localhost:3000/
+
+### Iniciar test anonimo
+POST http://localhost:3000/api/tests
+Content-Type: application/json
+
+{}
+
+### Obtener test por UUID
+GET http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355
