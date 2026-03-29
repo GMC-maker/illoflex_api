@@ -16,8 +16,8 @@
 		"type": "git",
 		"url": "git+ssh://git@github.com/GMC-maker/illoflex_api_repo.git"
 	},
-	"license": "MIT",
-	"author": "Gabriela Celano",
+	"license": "UNLICENSED",
+	"author": "Gabriela Maria Celano Diaz",
 	"type": "commonjs",
 	"main": "src/server.js",
 	"scripts": {
