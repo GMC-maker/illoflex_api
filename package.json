@@ -1,0 +1,39 @@
+{
+	"name": "illoflex-api",
+	"version": "1.0.0",
+	"description": "cuestionario-vocacional",
+	"keywords": [
+		"career-guidance",
+		"riasec",
+		"education",
+		"api"
+	],
+	"homepage": "https://github.com/GMC-maker/illoflex_api_repo#readme",
+	"bugs": {
+		"url": "https://github.com/GMC-maker/illoflex_api_repo/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+ssh://git@github.com/GMC-maker/illoflex_api_repo.git"
+	},
+	"license": "MIT",
+	"author": "Gabriela Celano",
+	"type": "commonjs",
+	"main": "src/server.js",
+	"scripts": {
+		"start": "node src/server.js",
+		"dev": "nodemon src/server.js",
+		"test": "echo \"No tests yet\""
+	},
+	"dependencies": {
+		"cors": "^2.8.6",
+		"dotenv": "^17.3.1",
+		"express": "^5.2.1",
+		"mysql2": "^3.20.0",
+		"sequelize": "^6.37.8",
+		"uuid": "^13.0.0"
+	},
+	"devDependencies": {
+		"nodemon": "^3.1.14"
+	}
+}
