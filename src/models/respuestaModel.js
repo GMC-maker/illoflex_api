@@ -114,6 +114,27 @@ const getResponseByTestAndOption = async (idTest, idOpcion) => {
 	});
 };
 
+const getResponsesByTestId = async (idTest) => {
+	return Respuesta.findAll({
+		where: {
+			id_test: idTest,
+		},
+		order: [
+			["id_pregunta", "ASC"],
+			["id_respuesta", "ASC"],
+		],
+	});
+};
+
+const getResponseByIdAndTestId = async (idRespuesta, idTest) => {
+	return Respuesta.findOne({
+		where: {
+			id_respuesta: idRespuesta,
+			id_test: idTest,
+		},
+	});
+};
+
 const createTestResponse = async ({ idTest, idPregunta, idOpcion }) => {
 	// Inserta una seleccion del usuario para una pregunta concreta del test.
 	return Respuesta.create({
@@ -123,11 +144,23 @@ const createTestResponse = async ({ idTest, idPregunta, idOpcion }) => {
 	});
 };
 
+const updateTestResponse = async (idRespuesta, idOpcion) => {
+	const response = await Respuesta.findByPk(idRespuesta);
+
+	response.id_opcion = idOpcion;
+	await response.save();
+
+	return response;
+};
+
 module.exports = {
 	Respuesta,
 	getActiveQuestionById,
 	getActiveOptionByQuestion,
 	countResponsesByTestAndQuestion,
 	getResponseByTestAndOption,
+	getResponsesByTestId,
+	getResponseByIdAndTestId,
 	createTestResponse,
+	updateTestResponse,
 };

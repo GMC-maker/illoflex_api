@@ -4,6 +4,29 @@
  */
 const testService = require("../services/testService");
 
+const updateTestResponse = async (req, res) => {
+	try {
+		// Permite cambiar una respuesta ya registrada antes de finalizar el test.
+		const updatedResponse = await testService.updateTestResponse(
+			req.params.uuid,
+			req.params.id_respuesta,
+			req.body,
+		);
+
+		return res.status(200).json({
+			ok: true,
+			datos: updatedResponse,
+			mensaje: "Respuesta actualizada correctamente",
+		});
+	} catch (error) {
+		return res.status(error.statusCode || 500).json({
+			ok: false,
+			datos: null,
+			mensaje: error.message || "No se pudo actualizar la respuesta",
+		});
+	}
+};
+
 const createTestResponse = async (req, res) => {
 	try {
 		// Registra una respuesta del test respetando las reglas del cuestionario.
@@ -22,6 +45,25 @@ const createTestResponse = async (req, res) => {
 			ok: false,
 			datos: null,
 			mensaje: error.message || "No se pudo registrar la respuesta",
+		});
+	}
+};
+
+const getTestResponses = async (req, res) => {
+	try {
+		// Devuelve las respuestas para que el cliente pueda reconstruir el test.
+		const responses = await testService.getTestResponses(req.params.uuid);
+
+		return res.status(200).json({
+			ok: true,
+			datos: responses,
+			mensaje: "Respuestas recuperadas correctamente",
+		});
+	} catch (error) {
+		return res.status(error.statusCode || 500).json({
+			ok: false,
+			datos: null,
+			mensaje: error.message || "No se pudieron recuperar las respuestas",
 		});
 	}
 };
@@ -73,7 +115,9 @@ const createAnonymousTest = async (req, res) => {
 };
 
 module.exports = {
+	updateTestResponse,
 	createTestResponse,
+	getTestResponses,
 	getTestByUuid,
 	createAnonymousTest,
 };

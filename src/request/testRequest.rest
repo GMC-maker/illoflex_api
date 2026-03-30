@@ -37,3 +37,25 @@ Content-Type: application/json
   "id_opcion": 3
 }
 
+### Ver respuestas registradas del test
+GET http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas
+
+### Cambiar la respuesta 1 de la pregunta 1 a la opcion 1
+PUT http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas/1
+Content-Type: application/json
+
+{
+  "id_opcion": 1
+}
+
+### Ver respuestas tras la edicion
+GET http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas
+
+### Intentar cambiar la respuesta 1 a una opcion ya usada por la otra respuesta
+PUT http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas/1
+Content-Type: application/json
+
+{
+  "id_opcion": 3
+}
+
