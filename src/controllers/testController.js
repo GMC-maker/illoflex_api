@@ -4,6 +4,28 @@
  */
 const testService = require("../services/testService");
 
+const createTestResponse = async (req, res) => {
+	try {
+		// Registra una respuesta del test respetando las reglas del cuestionario.
+		const savedResponse = await testService.createTestResponse(
+			req.params.uuid,
+			req.body,
+		);
+
+		return res.status(201).json({
+			ok: true,
+			datos: savedResponse,
+			mensaje: "Respuesta registrada correctamente",
+		});
+	} catch (error) {
+		return res.status(error.statusCode || 500).json({
+			ok: false,
+			datos: null,
+			mensaje: error.message || "No se pudo registrar la respuesta",
+		});
+	}
+};
+
 const getTestByUuid = async (req, res) => {
 	try {
 		// Este endpoint permite recuperar un intento concreto del test anonimo.
@@ -51,6 +73,7 @@ const createAnonymousTest = async (req, res) => {
 };
 
 module.exports = {
+	createTestResponse,
 	getTestByUuid,
 	createAnonymousTest,
 };

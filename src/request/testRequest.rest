@@ -9,3 +9,31 @@ Content-Type: application/json
 
 ### Obtener test por UUID
 GET http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355
+
+### Registrar primera respuesta valida para la pregunta 1
+POST http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas
+Content-Type: application/json
+
+{
+  "id_pregunta": 1,
+  "id_opcion": 1
+}
+
+### Registrar segunda respuesta valida para la pregunta 1
+POST http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas
+Content-Type: application/json
+
+{
+  "id_pregunta": 1,
+  "id_opcion": 2
+}
+
+### Intentar registrar una tercera respuesta para la misma pregunta
+POST http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas
+Content-Type: application/json
+
+{
+  "id_pregunta": 1,
+  "id_opcion": 3
+}
+
