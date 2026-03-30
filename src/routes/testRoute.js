@@ -1,12 +1,15 @@
 /**
  * Define las rutas HTTP del recurso test.
  * En esta fase permite iniciar el test vocacional, recuperarlo por UUID
- * y registrar respuestas del cuestionario.
+ * registrar respuestas del cuestionario y finalizarlo con resultado.
  */
 const express = require("express");
 const testController = require("../controllers/testController");
 
 const router = express.Router();
+
+// Finaliza el test, calcula el perfil y guarda el resultado vocacional.
+router.post("/:uuid/finalizar", testController.finalizeTest);
 
 // Actualiza una respuesta existente cuando el usuario vuelve atras en el test.
 router.put(

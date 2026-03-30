@@ -59,3 +59,5 @@ Content-Type: application/json
   "id_opcion": 3
 }
 
+###Prueba del finalizar el test###
+POST http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/finalizar

@@ -59,8 +59,19 @@ const getTestByUuid = async (uuid) => {
 	});
 };
 
+const finalizeTest = async (idTest, transaction) => {
+	const vocationalTest = await Test.findByPk(idTest, { transaction });
+
+	vocationalTest.estado = "FINALIZADO";
+	vocationalTest.fecha_finalizacion = new Date();
+	await vocationalTest.save({ transaction });
+
+	return vocationalTest;
+};
+
 module.exports = {
 	Test,
+	finalizeTest,
 	getTestByUuid,
 	createAnonymousTest,
 };

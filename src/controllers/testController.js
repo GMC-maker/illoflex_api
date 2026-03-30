@@ -4,6 +4,25 @@
  */
 const testService = require("../services/testService");
 
+const finalizeTest = async (req, res) => {
+	try {
+		// Cierra el test y devuelve el perfil vocacional calculado.
+		const result = await testService.finalizeTest(req.params.uuid);
+
+		return res.status(200).json({
+			ok: true,
+			datos: result,
+			mensaje: "Test finalizado correctamente",
+		});
+	} catch (error) {
+		return res.status(error.statusCode || 500).json({
+			ok: false,
+			datos: null,
+			mensaje: error.message || "No se pudo finalizar el test",
+		});
+	}
+};
+
 const updateTestResponse = async (req, res) => {
 	try {
 		// Permite cambiar una respuesta ya registrada antes de finalizar el test.
@@ -115,6 +134,7 @@ const createAnonymousTest = async (req, res) => {
 };
 
 module.exports = {
+	finalizeTest,
 	updateTestResponse,
 	createTestResponse,
 	getTestResponses,
