@@ -1,17 +1,47 @@
 ### Estado base de la API
 GET http://localhost:3000/
 
-### Iniciar test anonimo
+### Crear un nuevo test anonimo
 POST http://localhost:3000/api/tests
 Content-Type: application/json
 
 {}
 
-### Obtener test por UUID
+### ==========================================
+### TEST 1 - UUID ya usado para pruebas previas
+### UUID: 6e514b56-f984-4a01-9d54-83da38958355
+### ==========================================
+
+### Test 1 - Obtener test por UUID
 GET http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355
 
-### Registrar primera respuesta valida para la pregunta 1
-POST http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas
+### Test 1 - Ver respuestas registradas
+GET http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas
+
+### Test 1 - Editar la respuesta 1
+PUT http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas/1
+Content-Type: application/json
+
+{
+  "id_opcion": 1
+}
+
+### Test 1 - Intentar finalizar el test
+POST http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/finalizar
+Content-Type: application/json
+
+{}
+
+### ==========================================
+### TEST 2 - UUID nuevo para pruebas limpias
+### UUID: 4818b039-1c96-42d6-acda-da9780ebca95
+### ==========================================
+
+### Test 2 - Obtener test por UUID
+GET http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95
+
+### Test 2 - Registrar primera respuesta valida para la pregunta 1
+POST http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/respuestas
 Content-Type: application/json
 
 {
@@ -19,8 +49,8 @@ Content-Type: application/json
   "id_opcion": 1
 }
 
-### Registrar segunda respuesta valida para la pregunta 1
-POST http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas
+### Test 2 - Registrar segunda respuesta valida para la pregunta 1
+POST http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/respuestas
 Content-Type: application/json
 
 {
@@ -28,8 +58,8 @@ Content-Type: application/json
   "id_opcion": 2
 }
 
-### Intentar registrar una tercera respuesta para la misma pregunta
-POST http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas
+### Test 2 - Intentar registrar una tercera respuesta para la misma pregunta
+POST http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/respuestas
 Content-Type: application/json
 
 {
@@ -37,27 +67,30 @@ Content-Type: application/json
   "id_opcion": 3
 }
 
-### Ver respuestas registradas del test
-GET http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas
+### Test 2 - Ver respuestas registradas
+GET http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/respuestas
 
-### Cambiar la respuesta 1 de la pregunta 1 a la opcion 1
-PUT http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas/1
+### Test 2 - Editar la respuesta 1
+PUT http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/respuestas/1
 Content-Type: application/json
 
 {
   "id_opcion": 1
 }
 
-### Ver respuestas tras la edicion
-GET http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas
-
-### Intentar cambiar la respuesta 1 a una opcion ya usada por la otra respuesta
-PUT http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas/1
+### Test 2 - Intentar usar una opcion ya marcada
+PUT http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/respuestas/1
 Content-Type: application/json
 
 {
-  "id_opcion": 3
+  "id_opcion": 2
 }
 
-###Prueba del finalizar el test###
-POST http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/finalizar
+### Test 2 - Ver respuestas tras la edicion
+GET http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/respuestas
+
+### Test 2 - Intentar finalizar el test
+POST http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/finalizar
+Content-Type: application/json
+
+{}
