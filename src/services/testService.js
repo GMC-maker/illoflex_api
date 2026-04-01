@@ -5,7 +5,7 @@
  */
 const { v4: uuidv4 } = require("uuid");
 const sequelize = require("../config/sequelize");
-const respuestaModel = require("../models/respuestaModel");
+const respuestaRepository = require("../repositories/respuestaRepository");
 const resultadoModel = require("../models/resultadoModel");
 const testModel = require("../models/testModel");
 
@@ -94,8 +94,9 @@ const buildStoredScoresPayload = (sortedScores) => {
 };
 
 const validateCompletedTestResponses = async (idTest) => {
-	const activeQuestions = await respuestaModel.getActiveQuestions();
-	const responseCounts = await respuestaModel.getResponseCountsByQuestionForTest(idTest);
+	const activeQuestions = await respuestaRepository.getActiveQuestions();
+	const responseCounts =
+		await respuestaRepository.getResponseCountsByQuestionForTest(idTest);
 
 	const responseCountByQuestion = responseCounts.reduce((acc, row) => {
 		acc[Number(row.id_pregunta)] = Number(row.total_respuestas);
@@ -124,10 +125,11 @@ const finalizeTest = async (uuid) => {
 
 	await validateCompletedTestResponses(vocationalTest.id_test);
 
-	const rawScores = await respuestaModel.getRawScoresByDimensionForTest(
+	const rawScores = await respuestaRepository.getRawScoresByDimensionForTest(
 		vocationalTest.id_test,
 	);
-	const activeOptionCounts = await respuestaModel.getActiveOptionCountByDimension();
+	const activeOptionCounts =
+		await respuestaRepository.getActiveOptionCountByDimension();
 	const sortedScores = getSortedDimensionScores(rawScores, activeOptionCounts);
 	const primaryProfileScore = sortedScores[0];
 	const secondaryProfileScore = sortedScores[1] || null;
@@ -203,7 +205,9 @@ const getTestResponses = async (uuid) => {
 		throw createServiceError("Test no encontrado", 404);
 	}
 
-	const responses = await respuestaModel.getResponsesByTestId(vocationalTest.id_test);
+	const responses = await respuestaRepository.getResponsesByTestId(
+		vocationalTest.id_test,
+	);
 
 	return responses.map((response) => ({
 		id_respuesta: response.id_respuesta,
@@ -226,13 +230,16 @@ const createTestResponse = async (uuid, payload) => {
 
 	const vocationalTest = await getOpenVocationalTestByUuid(uuid);
 
-	const question = await respuestaModel.getActiveQuestionById(idPregunta);
+	const question = await respuestaRepository.getActiveQuestionById(idPregunta);
 
 	if (!question) {
 		throw createServiceError("La pregunta indicada no existe o no esta activa", 404);
 	}
 
-	const option = await respuestaModel.getActiveOptionByQuestion(idPregunta, idOpcion);
+	const option = await respuestaRepository.getActiveOptionByQuestion(
+		idPregunta,
+		idOpcion,
+	);
 
 	if (!option) {
 		throw createServiceError(
@@ -241,7 +248,7 @@ const createTestResponse = async (uuid, payload) => {
 		);
 	}
 
-	const existingResponse = await respuestaModel.getResponseByTestAndOption(
+	const existingResponse = await respuestaRepository.getResponseByTestAndOption(
 		vocationalTest.id_test,
 		idOpcion,
 	);
@@ -253,7 +260,8 @@ const createTestResponse = async (uuid, payload) => {
 		);
 	}
 
-	const currentResponses = await respuestaModel.countResponsesByTestAndQuestion(
+	const currentResponses =
+		await respuestaRepository.countResponsesByTestAndQuestion(
 		vocationalTest.id_test,
 		idPregunta,
 	);
@@ -266,7 +274,7 @@ const createTestResponse = async (uuid, payload) => {
 	}
 
 	// Esta operacion implementa el registro de respuestas del cuestionario RIASEC.
-	const savedResponse = await respuestaModel.createTestResponse({
+	const savedResponse = await respuestaRepository.createTestResponse({
 		idTest: vocationalTest.id_test,
 		idPregunta,
 		idOpcion,
@@ -292,7 +300,7 @@ const updateTestResponse = async (uuid, idRespuesta, payload) => {
 
 	const vocationalTest = await getOpenVocationalTestByUuid(uuid);
 
-	const existingResponse = await respuestaModel.getResponseByIdAndTestId(
+	const existingResponse = await respuestaRepository.getResponseByIdAndTestId(
 		responseId,
 		vocationalTest.id_test,
 	);
@@ -301,7 +309,7 @@ const updateTestResponse = async (uuid, idRespuesta, payload) => {
 		throw createServiceError("Respuesta no encontrada para este test", 404);
 	}
 
-	const option = await respuestaModel.getActiveOptionByQuestion(
+	const option = await respuestaRepository.getActiveOptionByQuestion(
 		existingResponse.id_pregunta,
 		idOpcion,
 	);
@@ -313,7 +321,7 @@ const updateTestResponse = async (uuid, idRespuesta, payload) => {
 		);
 	}
 
-	const duplicatedOption = await respuestaModel.getResponseByTestAndOption(
+	const duplicatedOption = await respuestaRepository.getResponseByTestAndOption(
 		vocationalTest.id_test,
 		idOpcion,
 	);
@@ -326,7 +334,7 @@ const updateTestResponse = async (uuid, idRespuesta, payload) => {
 	}
 
 	// Sustituye una seleccion anterior por otra valida de la misma pregunta.
-	const updatedResponse = await respuestaModel.updateTestResponse(
+	const updatedResponse = await respuestaRepository.updateTestResponse(
 		responseId,
 		idOpcion,
 	);
