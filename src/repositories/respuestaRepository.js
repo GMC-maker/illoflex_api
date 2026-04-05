@@ -60,6 +60,25 @@ const getActiveQuestions = async () => {
 	});
 };
 
+const getActiveQuestionsWithOptions = async () => {
+	return Pregunta.findAll({
+		where: { activa: true },
+		attributes: ["id_pregunta", "enunciado", "orden"],
+		include: [
+			{
+				model: Opcion,
+				as: "opciones",
+				where: { activa: true },
+				attributes: ["id_opcion", "texto"],
+			},
+		],
+		order: [
+			["orden", "ASC"],
+			[{ model: Opcion, as: "opciones" }, "id_opcion", "ASC"],
+		],
+	});
+};
+
 const getResponsesByTestId = async (idTest) => {
 	return Respuesta.findAll({
 		where: {
@@ -152,6 +171,7 @@ module.exports = {
 	countResponsesByTestAndQuestion,
 	getResponseByTestQuestionAndOption,
 	getActiveQuestions,
+	getActiveQuestionsWithOptions,
 	getResponsesByTestId,
 	getResponseCountsByQuestionForTest,
 	getResponseByIdAndTestId,

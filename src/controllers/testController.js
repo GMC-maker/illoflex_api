@@ -23,6 +23,24 @@ const finalizeTest = async (req, res) => {
 	}
 };
 
+const getTestQuestions = async (req, res) => {
+	try {
+		const questions = await testService.getTestQuestions(req.params.uuid);
+
+		return res.status(200).json({
+			ok: true,
+			datos: questions,
+			mensaje: "Preguntas recuperadas correctamente",
+		});
+	} catch (error) {
+		return res.status(error.statusCode || 500).json({
+			ok: false,
+			datos: null,
+			mensaje: error.message || "No se pudieron recuperar las preguntas",
+		});
+	}
+};
+
 const updateTestResponse = async (req, res) => {
 	try {
 		// Permite cambiar una respuesta ya registrada antes de finalizar el test.
@@ -135,6 +153,7 @@ const createAnonymousTest = async (req, res) => {
 
 module.exports = {
 	finalizeTest,
+	getTestQuestions,
 	updateTestResponse,
 	createTestResponse,
 	getTestResponses,

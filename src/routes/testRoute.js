@@ -11,6 +11,9 @@ const router = express.Router();
 // Finaliza el test, calcula el perfil y guarda el resultado vocacional.
 router.post("/:uuid/finalizar", testController.finalizeTest);
 
+// Recupera las preguntas activas y sus opciones para recorrer el test.
+router.get("/:uuid/preguntas", testController.getTestQuestions);
+
 // Actualiza una respuesta existente cuando el usuario vuelve atras en el test.
 router.put(
 	"/:uuid/respuestas/:id_respuesta",

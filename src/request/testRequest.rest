@@ -40,6 +40,9 @@ Content-Type: application/json
 ### Test 2 - Obtener test por UUID
 GET http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95
 
+### Test 2 - Obtener preguntas activas con opciones
+GET http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/preguntas
+
 ### Test 2 - Registrar primera respuesta valida para la pregunta 1
 POST http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/respuestas
 Content-Type: application/json
