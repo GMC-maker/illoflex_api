@@ -248,10 +248,13 @@ const createTestResponse = async (uuid, payload) => {
 		);
 	}
 
-	const existingResponse = await respuestaRepository.getResponseByTestAndOption(
+	// El duplicado solo se comprueba dentro de la pregunta actual del test.
+	const existingResponse =
+		await respuestaRepository.getResponseByTestQuestionAndOption(
 		vocationalTest.id_test,
+		idPregunta,
 		idOpcion,
-	);
+		);
 
 	if (existingResponse) {
 		throw createServiceError(
@@ -321,10 +324,14 @@ const updateTestResponse = async (uuid, idRespuesta, payload) => {
 		);
 	}
 
-	const duplicatedOption = await respuestaRepository.getResponseByTestAndOption(
-		vocationalTest.id_test,
-		idOpcion,
-	);
+	// Al editar, solo bloquea que las dos respuestas actuales de la misma
+	// pregunta queden duplicadas al mismo tiempo.
+	const duplicatedOption =
+		await respuestaRepository.getResponseByTestQuestionAndOption(
+			vocationalTest.id_test,
+			existingResponse.id_pregunta,
+			idOpcion,
+		);
 
 	if (duplicatedOption && duplicatedOption.id_respuesta !== responseId) {
 		throw createServiceError(
