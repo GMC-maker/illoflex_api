@@ -1,6 +1,8 @@
 /**
  * Centraliza el acceso a datos relacionado con las respuestas del test,
  * reutilizando los modelos Sequelize definidos en la capa models.
+ * Las consultas de duplicados se resuelven por pregunta para respetar
+ * el estado actual de sus dos selecciones.
  */
 const sequelize = require("../config/sequelize");
 const {
@@ -37,10 +39,15 @@ const countResponsesByTestAndQuestion = async (idTest, idPregunta) => {
 	});
 };
 
-const getResponseByTestAndOption = async (idTest, idOpcion) => {
+const getResponseByTestQuestionAndOption = async (
+	idTest,
+	idPregunta,
+	idOpcion,
+) => {
 	return Respuesta.findOne({
 		where: {
 			id_test: idTest,
+			id_pregunta: idPregunta,
 			id_opcion: idOpcion,
 		},
 	});
@@ -143,7 +150,7 @@ module.exports = {
 	getActiveQuestionById,
 	getActiveOptionByQuestion,
 	countResponsesByTestAndQuestion,
-	getResponseByTestAndOption,
+	getResponseByTestQuestionAndOption,
 	getActiveQuestions,
 	getResponsesByTestId,
 	getResponseCountsByQuestionForTest,
