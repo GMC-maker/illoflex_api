@@ -198,6 +198,21 @@ const finalizeTest = async (uuid) => {
 	return result;
 };
 
+const getTestQuestions = async (uuid) => {
+	await getOpenVocationalTestByUuid(uuid);
+	const questions = await respuestaRepository.getActiveQuestionsWithOptions();
+
+	return questions.map((question) => ({
+		id_pregunta: question.id_pregunta,
+		enunciado: question.enunciado,
+		orden: question.orden,
+		opciones: question.opciones.map((option) => ({
+			id_opcion: option.id_opcion,
+			texto: option.texto,
+		})),
+	}));
+};
+
 const getTestResponses = async (uuid) => {
 	const vocationalTest = await testModel.getTestByUuid(uuid);
 
@@ -383,6 +398,7 @@ const createAnonymousTest = async () => {
 
 module.exports = {
 	finalizeTest,
+	getTestQuestions,
 	updateTestResponse,
 	createTestResponse,
 	getTestResponses,

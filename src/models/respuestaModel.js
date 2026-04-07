@@ -12,6 +12,10 @@ const Pregunta = sequelize.define(
 			type: DataTypes.INTEGER.UNSIGNED,
 			primaryKey: true,
 		},
+		enunciado: {
+			type: DataTypes.STRING(255),
+			allowNull: false,
+		},
 		orden: {
 			type: DataTypes.SMALLINT.UNSIGNED,
 			allowNull: true,
@@ -40,6 +44,10 @@ const Opcion = sequelize.define(
 		},
 		id_dimension: {
 			type: DataTypes.TINYINT.UNSIGNED,
+			allowNull: false,
+		},
+		texto: {
+			type: DataTypes.STRING(255),
 			allowNull: false,
 		},
 		activa: {
@@ -84,6 +92,15 @@ const Respuesta = sequelize.define(
 		timestamps: false,
 	},
 );
+
+Pregunta.hasMany(Opcion, {
+	foreignKey: "id_pregunta",
+	as: "opciones",
+});
+
+Opcion.belongsTo(Pregunta, {
+	foreignKey: "id_pregunta",
+});
 
 module.exports = {
 	Respuesta,
