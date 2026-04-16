@@ -9,12 +9,14 @@ const respuestaRepository = require("../repositories/respuestaRepository");
 const resultadoModel = require("../models/resultadoModel");
 const testModel = require("../models/testModel");
 
+// Centraliza la creacion de errores de negocio con su codigo HTTP asociado.
 const createServiceError = (message, statusCode) => {
 	const error = new Error(message);
 	error.statusCode = statusCode;
 	return error;
 };
 
+// Recupera un test en curso y evita operar sobre tests inexistentes o ya cerrados.
 const getOpenVocationalTestByUuid = async (uuid) => {
 	const vocationalTest = await testModel.getTestByUuid(uuid);
 
@@ -29,13 +31,17 @@ const getOpenVocationalTestByUuid = async (uuid) => {
 	return vocationalTest;
 };
 
-const getSortedDimensionScores = (rawScores, activeOptionCounts) => {
-	const activeOptionsByCode = activeOptionCounts.reduce((acc, row) => {
+// Calcula y ordena los perfiles RIASEC a partir de las respuestas y las opciones activas.
+const calculateAndRankProfiles = (
+	rawScoresByDimension,
+	totalOptionsPerDimension,
+) => {
+	const activeOptionsByCode = totalOptionsPerDimension.reduce((acc, row) => {
 		acc[row.codigo] = Number(row.total_opciones);
 		return acc;
 	}, {});
 
-	const scoresByCode = resultadoModel.BASE_PROFILES.reduce((acc, profile) => {
+	const profilesScoreMap = resultadoModel.BASE_PROFILES.reduce((acc, profile) => {
 		acc[profile.codigo] = {
 			codigo: profile.codigo,
 			nombre: profile.nombre,
@@ -47,18 +53,18 @@ const getSortedDimensionScores = (rawScores, activeOptionCounts) => {
 		return acc;
 	}, {});
 
-	for (const row of rawScores) {
+	for (const row of rawScoresByDimension) {
 		const code = row.codigo;
 		const rawScore = Number(row.puntuacion);
-		const totalOptions = scoresByCode[code].total_opciones_activas;
+		const totalOptions = profilesScoreMap[code].total_opciones_activas;
 
-		scoresByCode[code].puntuacion_bruta = rawScore;
-		scoresByCode[code].puntuacion_normalizada =
+		profilesScoreMap[code].puntuacion_bruta = rawScore;
+		profilesScoreMap[code].puntuacion_normalizada =
 			totalOptions > 0 ? Number((rawScore / totalOptions).toFixed(4)) : 0;
 	}
 
 	// Normaliza para compensar dimensiones con diferente numero de opciones activas.
-	return Object.values(scoresByCode).sort((left, right) => {
+	return Object.values(profilesScoreMap).sort((left, right) => {
 		if (right.puntuacion_normalizada !== left.puntuacion_normalizada) {
 			return right.puntuacion_normalizada - left.puntuacion_normalizada;
 		}
@@ -71,19 +77,20 @@ const getSortedDimensionScores = (rawScores, activeOptionCounts) => {
 	});
 };
 
-const buildStoredScoresPayload = (sortedScores) => {
-	const rawScores = {};
+// Construye el resumen de puntuaciones que se guardara junto al resultado del test.
+const buildResultScoreSummary = (rankedProfiles) => {
+	const rawScoresByDimension = {};
 	const normalizedScores = {};
 
-	for (const score of sortedScores) {
-		rawScores[score.codigo] = score.puntuacion_bruta;
+	for (const score of rankedProfiles) {
+		rawScoresByDimension[score.codigo] = score.puntuacion_bruta;
 		normalizedScores[score.codigo] = score.puntuacion_normalizada;
 	}
 
 	return {
-		brutas: rawScores,
+		brutas: rawScoresByDimension,
 		normalizadas: normalizedScores,
-		ranking: sortedScores.map((score, index) => ({
+		ranking: rankedProfiles.map((score, index) => ({
 			posicion: index + 1,
 			codigo: score.codigo,
 			nombre: score.nombre,
@@ -93,6 +100,7 @@ const buildStoredScoresPayload = (sortedScores) => {
 	};
 };
 
+// Comprueba que todas las preguntas activas tengan exactamente dos respuestas antes de cerrar el test.
 const validateCompletedTestResponses = async (idTest) => {
 	const activeQuestions = await respuestaRepository.getActiveQuestions();
 	const responseCounts =
@@ -115,7 +123,8 @@ const validateCompletedTestResponses = async (idTest) => {
 	}
 };
 
-const finalizeTest = async (uuid) => {
+// Completa el test, genera el resultado vocacional y deja persistido el resumen de puntuaciones.
+const completeTestGenerateResult = async (uuid) => {
 	const vocationalTest = await getOpenVocationalTestByUuid(uuid);
 	const existingResult = await resultadoModel.getResultByTestId(vocationalTest.id_test);
 
@@ -125,14 +134,19 @@ const finalizeTest = async (uuid) => {
 
 	await validateCompletedTestResponses(vocationalTest.id_test);
 
-	const rawScores = await respuestaRepository.getRawScoresByDimensionForTest(
+	const rawScoresByDimension =
+		await respuestaRepository.getRawScoresByDimensionForTest(
 		vocationalTest.id_test,
-	);
-	const activeOptionCounts =
+		);
+	const totalOptionsPerDimension =
 		await respuestaRepository.getActiveOptionCountByDimension();
-	const sortedScores = getSortedDimensionScores(rawScores, activeOptionCounts);
-	const primaryProfileScore = sortedScores[0];
-	const secondaryProfileScore = sortedScores[1] || null;
+	const rankedProfiles = calculateAndRankProfiles(
+		rawScoresByDimension,
+		totalOptionsPerDimension,
+	);
+	const primaryProfileScore = rankedProfiles[0];
+	const secondaryProfileScore = rankedProfiles[1] || null;
+	const tertiaryProfileScore = rankedProfiles[2] || null;
 
 	const result = await sequelize.transaction(async (transaction) => {
 		await resultadoModel.ensureBaseProfiles(transaction);
@@ -147,8 +161,15 @@ const finalizeTest = async (uuid) => {
 					transaction,
 				)
 			: null;
+		// El perfil terciario permite mostrar una tercera orientacion sin cambiar el calculo base.
+		const tertiaryProfile = tertiaryProfileScore
+			? await resultadoModel.getProfileByCode(
+					tertiaryProfileScore.codigo,
+					transaction,
+				)
+			: null;
 
-		const storedScores = buildStoredScoresPayload(sortedScores);
+		const storedScores = buildResultScoreSummary(rankedProfiles);
 
 		// Guarda el perfil dominante y conserva el detalle de puntuaciones para futuras ampliaciones.
 		const savedResult = await resultadoModel.createTestResult(
@@ -165,6 +186,12 @@ const finalizeTest = async (uuid) => {
 						? {
 								codigo: secondaryProfile.codigo,
 								nombre: secondaryProfile.nombre,
+							}
+						: null,
+					perfil_terciario: tertiaryProfile
+						? {
+								codigo: tertiaryProfile.codigo,
+								nombre: tertiaryProfile.nombre,
 							}
 						: null,
 				},
@@ -188,6 +215,13 @@ const finalizeTest = async (uuid) => {
 						descripcion: secondaryProfile.descripcion,
 					}
 				: null,
+			perfil_terciario: tertiaryProfile
+				? {
+						codigo: tertiaryProfile.codigo,
+						nombre: tertiaryProfile.nombre,
+						descripcion: tertiaryProfile.descripcion,
+					}
+				: null,
 			puntuaciones: {
 				brutas: storedScores.brutas,
 				normalizadas: storedScores.normalizadas,
@@ -198,6 +232,7 @@ const finalizeTest = async (uuid) => {
 	return result;
 };
 
+// Devuelve las preguntas activas con sus opciones para que el frontend recorra el cuestionario.
 const getTestQuestions = async (uuid) => {
 	await getOpenVocationalTestByUuid(uuid);
 	const questions = await respuestaRepository.getActiveQuestionsWithOptions();
@@ -213,6 +248,7 @@ const getTestQuestions = async (uuid) => {
 	}));
 };
 
+// Recupera las respuestas ya guardadas para reconstruir el estado del test en cliente.
 const getTestResponses = async (uuid) => {
 	const vocationalTest = await testModel.getTestByUuid(uuid);
 
@@ -232,9 +268,11 @@ const getTestResponses = async (uuid) => {
 	}));
 };
 
-const createTestResponse = async (uuid, payload) => {
-	const idPregunta = Number(payload?.id_pregunta);
-	const idOpcion = Number(payload?.id_opcion);
+// Registra una nueva respuesta validando que la opcion pertenezca a la pregunta y no duplique seleccion.
+// responseData contiene id_pregunta e id_opcion, representando los datos de una respuesta del test.
+const createTestResponse = async (uuid, responseData) => {
+	const idPregunta = Number(responseData?.id_pregunta);
+	const idOpcion = Number(responseData?.id_opcion);
 
 	if (!Number.isInteger(idPregunta) || !Number.isInteger(idOpcion)) {
 		throw createServiceError(
@@ -305,9 +343,11 @@ const createTestResponse = async (uuid, payload) => {
 	};
 };
 
-const updateTestResponse = async (uuid, idRespuesta, payload) => {
+// Sustituye una respuesta existente por otra opcion valida de la misma pregunta.
+// responseData contiene id_opcion como dato necesario para sustituir una respuesta existente del test.
+const updateTestResponse = async (uuid, idRespuesta, responseData) => {
 	const responseId = Number(idRespuesta);
-	const idOpcion = Number(payload?.id_opcion);
+	const idOpcion = Number(responseData?.id_opcion);
 
 	if (!Number.isInteger(responseId) || !Number.isInteger(idOpcion)) {
 		throw createServiceError(
@@ -368,6 +408,7 @@ const updateTestResponse = async (uuid, idRespuesta, payload) => {
 	};
 };
 
+// Recupera la informacion minima del test necesaria para continuar el flujo o consultar su estado.
 const getTestByUuid = async (uuid) => {
 	// Recupera la informacion minima necesaria para continuar el flujo del test.
 	const vocationalTest = await testModel.getTestByUuid(uuid);
@@ -384,6 +425,7 @@ const getTestByUuid = async (uuid) => {
 	};
 };
 
+// Crea un nuevo test anonimo y genera el UUID que identificara ese intento.
 const createAnonymousTest = async () => {
 	// Cada intento del test se identifica con un UUID unico y anonimo.
 	const uuid = uuidv4();
@@ -397,7 +439,7 @@ const createAnonymousTest = async () => {
 };
 
 module.exports = {
-	finalizeTest,
+	completeTestGenerateResult,
 	getTestQuestions,
 	updateTestResponse,
 	createTestResponse,

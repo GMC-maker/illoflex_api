@@ -4,10 +4,11 @@
  */
 const testService = require("../services/testService");
 
+// Cierra el test y devuelve al cliente el resultado vocacional calculado.
 const finalizeTest = async (req, res) => {
 	try {
 		// Cierra el test y devuelve el perfil vocacional calculado.
-		const result = await testService.finalizeTest(req.params.uuid);
+		const result = await testService.completeTestGenerateResult(req.params.uuid);
 
 		return res.status(200).json({
 			ok: true,
@@ -23,6 +24,7 @@ const finalizeTest = async (req, res) => {
 	}
 };
 
+// Entrega las preguntas activas del test con sus opciones listas para mostrarse en el frontend.
 const getTestQuestions = async (req, res) => {
 	try {
 		const questions = await testService.getTestQuestions(req.params.uuid);
@@ -41,6 +43,7 @@ const getTestQuestions = async (req, res) => {
 	}
 };
 
+// Actualiza una respuesta ya existente del test manteniendo la validacion en la capa service.
 const updateTestResponse = async (req, res) => {
 	try {
 		// Permite cambiar una respuesta ya registrada antes de finalizar el test.
@@ -64,6 +67,7 @@ const updateTestResponse = async (req, res) => {
 	}
 };
 
+// Registra una nueva respuesta del usuario para una pregunta concreta del cuestionario.
 const createTestResponse = async (req, res) => {
 	try {
 		// Registra una respuesta del test respetando las reglas del cuestionario.
@@ -86,6 +90,7 @@ const createTestResponse = async (req, res) => {
 	}
 };
 
+
 const getTestResponses = async (req, res) => {
 	try {
 		// Devuelve las respuestas para que el cliente pueda reconstruir el test.
@@ -105,6 +110,7 @@ const getTestResponses = async (req, res) => {
 	}
 };
 
+// Recupera un test anonimo por UUID y expone solo la informacion minima necesaria.
 const getTestByUuid = async (req, res) => {
 	try {
 		// Este endpoint permite recuperar un intento concreto del test anonimo.
@@ -132,6 +138,7 @@ const getTestByUuid = async (req, res) => {
 	}
 };
 
+// Inicia un nuevo test anonimo y devuelve el identificador con el que seguira el flujo.
 const createAnonymousTest = async (req, res) => {
 	try {
 		// El controller solo coordina la peticion y la respuesta.

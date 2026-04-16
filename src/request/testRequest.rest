@@ -1,49 +1,25 @@
-### Estado base de la API
+### ==========================================
+### ESTADO BASE DE LA API
+### ==========================================
+
+### Comprobar que la API esta disponible
 GET http://localhost:3000/
 
-### Crear un nuevo test anonimo
+
+### ==========================================
+### FLUJO PRINCIPAL DEL TEST VOCACIONAL
+### ==========================================
+
+### 1. Crear un nuevo test anonimo
 POST http://localhost:3000/api/tests
 Content-Type: application/json
 
 {}
 
-### ==========================================
-### TEST 1 - UUID ya usado para pruebas previas
-### UUID: 6e514b56-f984-4a01-9d54-83da38958355
-### ==========================================
-
-### Test 1 - Obtener test por UUID
-GET http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355
-
-### Test 1 - Ver respuestas registradas
-GET http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas
-
-### Test 1 - Editar la respuesta 1
-PUT http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas/1
-Content-Type: application/json
-
-{
-  "id_opcion": 1
-}
-
-### Test 1 - Intentar finalizar el test
-POST http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/finalizar
-Content-Type: application/json
-
-{}
-
-### ==========================================
-### TEST 2 - UUID nuevo para pruebas limpias
-### UUID: 4818b039-1c96-42d6-acda-da9780ebca95
-### ==========================================
-
-### Test 2 - Obtener test por UUID
-GET http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95
-
-### Test 2 - Obtener preguntas activas con opciones
+### 2. Obtener preguntas activas con opciones para un test
 GET http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/preguntas
 
-### Test 2 - Registrar primera respuesta valida para la pregunta 1
+### 3. Registrar primera respuesta valida para la pregunta 1
 POST http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/respuestas
 Content-Type: application/json
 
@@ -52,7 +28,7 @@ Content-Type: application/json
   "id_opcion": 1
 }
 
-### Test 2 - Registrar segunda respuesta valida para la pregunta 1
+### 4. Registrar segunda respuesta valida para la pregunta 1
 POST http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/respuestas
 Content-Type: application/json
 
@@ -61,7 +37,7 @@ Content-Type: application/json
   "id_opcion": 2
 }
 
-### Test 2 - Intentar registrar una tercera respuesta para la misma pregunta
+### 5. Intentar registrar una tercera respuesta para la misma pregunta
 POST http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/respuestas
 Content-Type: application/json
 
@@ -70,10 +46,10 @@ Content-Type: application/json
   "id_opcion": 3
 }
 
-### Test 2 - Ver respuestas registradas
+### 6. Ver respuestas registradas para el test
 GET http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/respuestas
 
-### Test 2 - Editar la respuesta 1
+### 7. Editar la respuesta 1
 PUT http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/respuestas/1
 Content-Type: application/json
 
@@ -81,7 +57,7 @@ Content-Type: application/json
   "id_opcion": 1
 }
 
-### Test 2 - Intentar usar una opcion ya marcada
+### 8. Intentar usar una opcion ya marcada en la misma pregunta
 PUT http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/respuestas/1
 Content-Type: application/json
 
@@ -89,11 +65,24 @@ Content-Type: application/json
   "id_opcion": 2
 }
 
-### Test 2 - Ver respuestas tras la edicion
+### 9. Ver respuestas tras la edicion
 GET http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/respuestas
 
-### Test 2 - Intentar finalizar el test
+### 10. Intentar finalizar el test
 POST http://localhost:3000/api/tests/4818b039-1c96-42d6-acda-da9780ebca95/finalizar
 Content-Type: application/json
 
 {}
+
+
+### ==========================================
+### CONSULTAS DE SOPORTE POR UUID
+### ==========================================
+### Estas consultas se mantuvieron porque fueron utiles para depurar
+### el frontend y para reconstruir el estado del test durante el desarrollo.
+
+### Obtener test por UUID para revisar su estado general
+GET http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355
+
+### Ver respuestas registradas de un test concreto por UUID
+GET http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas
