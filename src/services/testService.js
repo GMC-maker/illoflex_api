@@ -146,6 +146,7 @@ const completeTestGenerateResult = async (uuid) => {
 	);
 	const primaryProfileScore = rankedProfiles[0];
 	const secondaryProfileScore = rankedProfiles[1] || null;
+	const tertiaryProfileScore = rankedProfiles[2] || null;
 
 	const result = await sequelize.transaction(async (transaction) => {
 		await resultadoModel.ensureBaseProfiles(transaction);
@@ -157,6 +158,13 @@ const completeTestGenerateResult = async (uuid) => {
 		const secondaryProfile = secondaryProfileScore
 			? await resultadoModel.getProfileByCode(
 					secondaryProfileScore.codigo,
+					transaction,
+				)
+			: null;
+		// El perfil terciario permite mostrar una tercera orientacion sin cambiar el calculo base.
+		const tertiaryProfile = tertiaryProfileScore
+			? await resultadoModel.getProfileByCode(
+					tertiaryProfileScore.codigo,
 					transaction,
 				)
 			: null;
@@ -180,6 +188,12 @@ const completeTestGenerateResult = async (uuid) => {
 								nombre: secondaryProfile.nombre,
 							}
 						: null,
+					perfil_terciario: tertiaryProfile
+						? {
+								codigo: tertiaryProfile.codigo,
+								nombre: tertiaryProfile.nombre,
+							}
+						: null,
 				},
 			},
 			transaction,
@@ -199,6 +213,13 @@ const completeTestGenerateResult = async (uuid) => {
 						codigo: secondaryProfile.codigo,
 						nombre: secondaryProfile.nombre,
 						descripcion: secondaryProfile.descripcion,
+					}
+				: null,
+			perfil_terciario: tertiaryProfile
+				? {
+						codigo: tertiaryProfile.codigo,
+						nombre: tertiaryProfile.nombre,
+						descripcion: tertiaryProfile.descripcion,
 					}
 				: null,
 			puntuaciones: {
