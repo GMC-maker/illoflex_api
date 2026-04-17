@@ -6,6 +6,7 @@
 const { v4: uuidv4 } = require("uuid");
 const sequelize = require("../config/sequelize");
 const respuestaRepository = require("../repositories/respuestaRepository");
+const resultadoRecomendacionRepository = require("../repositories/resultadoRecomendacionRepository");
 const resultadoModel = require("../models/resultadoModel");
 const testModel = require("../models/testModel");
 
@@ -100,6 +101,33 @@ const buildResultScoreSummary = (rankedProfiles) => {
 	};
 };
 
+// Normaliza las familias recomendadas para devolver un JSON claro al frontend.
+const formatRecommendedFamilies = (families) => {
+	return families.map((family) => ({
+		id_familia: family.id_familia,
+		nombre: family.nombre,
+		descripcion: family.descripcion,
+		grado_afinidad: Number(family.grado_afinidad),
+	}));
+};
+
+// Normaliza los ciclos recomendados incluyendo la familia profesional asociada.
+const formatRecommendedCycles = (cycles) => {
+	return cycles.map((cycle) => ({
+		id_ciclo: cycle.id_ciclo,
+		id_familia: cycle.id_familia,
+		codigo_oficial: cycle.codigo_oficial,
+		nombre: cycle.nombre,
+		nivel: cycle.nivel,
+		descripcion: cycle.descripcion,
+		duracion_horas: cycle.duracion_horas,
+		familia: {
+			nombre: cycle.familia_nombre,
+		},
+		afinidad_riasec: Number(Number(cycle.afinidad_riasec).toFixed(4)),
+	}));
+};
+
 // Comprueba que todas las preguntas activas tengan exactamente dos respuestas antes de cerrar el test.
 const validateCompletedTestResponses = async (idTest) => {
 	const activeQuestions = await respuestaRepository.getActiveQuestions();
@@ -170,6 +198,20 @@ const completeTestGenerateResult = async (uuid) => {
 			: null;
 
 		const storedScores = buildResultScoreSummary(rankedProfiles);
+		const recommendationProfileIds = [
+			primaryProfile.id_perfil,
+			secondaryProfile?.id_perfil,
+			tertiaryProfile?.id_perfil,
+		].filter(Boolean);
+		// Las recomendaciones se calculan con los perfiles principales y las puntuaciones RIASEC.
+		const recommendedFamilies =
+			await resultadoRecomendacionRepository.getRecommendedFamiliesByProfileIds(
+				recommendationProfileIds,
+			);
+		const recommendedCycles =
+			await resultadoRecomendacionRepository.getRecommendedCyclesByRiasecScores(
+				storedScores.normalizadas,
+			);
 
 		// Guarda el perfil dominante y conserva el detalle de puntuaciones para futuras ampliaciones.
 		const savedResult = await resultadoModel.createTestResult(
@@ -226,6 +268,8 @@ const completeTestGenerateResult = async (uuid) => {
 				brutas: storedScores.brutas,
 				normalizadas: storedScores.normalizadas,
 			},
+			familias_recomendadas: formatRecommendedFamilies(recommendedFamilies),
+			ciclos_recomendados: formatRecommendedCycles(recommendedCycles),
 		};
 	});
 
