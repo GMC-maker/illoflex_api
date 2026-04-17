@@ -128,6 +128,33 @@ const formatRecommendedCycles = (cycles) => {
 	}));
 };
 
+// Agrupa las recomendaciones para mostrar pocas familias y pocos ciclos por cada una.
+const buildGroupedRecommendations = async (families, normalizedScores) => {
+	const topFamilies = families.slice(0, 3);
+	const groupedRecommendations = [];
+
+	for (const family of topFamilies) {
+		const familyCycles =
+			await resultadoRecomendacionRepository.getRecommendedCyclesByFamilyAndRiasecScores(
+				family.id_familia,
+				normalizedScores,
+				3,
+			);
+
+		groupedRecommendations.push({
+			familia: {
+				id_familia: family.id_familia,
+				nombre: family.nombre,
+				descripcion: family.descripcion,
+			},
+			grado_afinidad: Number(family.grado_afinidad),
+			ciclos: formatRecommendedCycles(familyCycles),
+		});
+	}
+
+	return groupedRecommendations;
+};
+
 // Comprueba que todas las preguntas activas tengan exactamente dos respuestas antes de cerrar el test.
 const validateCompletedTestResponses = async (idTest) => {
 	const activeQuestions = await respuestaRepository.getActiveQuestions();
@@ -207,11 +234,16 @@ const completeTestGenerateResult = async (uuid) => {
 		const recommendedFamilies =
 			await resultadoRecomendacionRepository.getRecommendedFamiliesByProfileIds(
 				recommendationProfileIds,
+				3,
 			);
 		const recommendedCycles =
 			await resultadoRecomendacionRepository.getRecommendedCyclesByRiasecScores(
 				storedScores.normalizadas,
 			);
+		const groupedRecommendations = await buildGroupedRecommendations(
+			recommendedFamilies,
+			storedScores.normalizadas,
+		);
 
 		// Guarda el perfil dominante y conserva el detalle de puntuaciones para futuras ampliaciones.
 		const savedResult = await resultadoModel.createTestResult(
@@ -268,6 +300,7 @@ const completeTestGenerateResult = async (uuid) => {
 				brutas: storedScores.brutas,
 				normalizadas: storedScores.normalizadas,
 			},
+			recomendaciones: groupedRecommendations,
 			familias_recomendadas: formatRecommendedFamilies(recommendedFamilies),
 			ciclos_recomendados: formatRecommendedCycles(recommendedCycles),
 		};

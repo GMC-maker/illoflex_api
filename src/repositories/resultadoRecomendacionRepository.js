@@ -79,7 +79,61 @@ const getRecommendedCyclesByRiasecScores = async (normalizedScores, limit = 8) =
 	return rows;
 };
 
+// Busca ciclos candidatos dentro de una familia concreta usando las puntuaciones RIASEC del test.
+const getRecommendedCyclesByFamilyAndRiasecScores = async (
+	idFamilia,
+	normalizedScores,
+	limit = 3,
+) => {
+	if (!idFamilia || !normalizedScores) {
+		return [];
+	}
+
+	const [rows] = await sequelize.query(
+		`
+			SELECT
+				c.id_ciclo,
+				c.id_familia,
+				c.codigo_oficial,
+				c.nombre,
+				c.nivel,
+				c.descripcion,
+				c.duracion_horas,
+				f.nombre AS familia_nombre,
+				(
+					cra.puntaje_r * :scoreR +
+					cra.puntaje_i * :scoreI +
+					cra.puntaje_a * :scoreA +
+					cra.puntaje_s * :scoreS +
+					cra.puntaje_e * :scoreE +
+					cra.puntaje_c * :scoreC
+				) AS afinidad_riasec
+			FROM ciclo_riasec_afinidad cra
+			INNER JOIN ciclo_formativo c ON c.id_ciclo = cra.id_ciclo
+			INNER JOIN familia_fp f ON f.id_familia = c.id_familia
+			WHERE c.id_familia = :idFamilia
+			ORDER BY afinidad_riasec DESC, c.nombre ASC
+			LIMIT :limit
+		`,
+		{
+			replacements: {
+				idFamilia,
+				scoreR: Number(normalizedScores.R || 0),
+				scoreI: Number(normalizedScores.I || 0),
+				scoreA: Number(normalizedScores.A || 0),
+				scoreS: Number(normalizedScores.S || 0),
+				scoreE: Number(normalizedScores.E || 0),
+				scoreC: Number(normalizedScores.C || 0),
+				limit,
+			},
+		},
+	);
+
+	return rows;
+};
+
 module.exports = {
 	getRecommendedFamiliesByProfileIds,
 	getRecommendedCyclesByRiasecScores,
+	getRecommendedCyclesByFamilyAndRiasecScores,
 };
