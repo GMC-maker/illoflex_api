@@ -65,6 +65,12 @@ const Resultado = sequelize.define(
 	},
 );
 
+// Relaciona el resultado guardado con el perfil principal calculado.
+Resultado.belongsTo(Perfil, {
+	foreignKey: "id_perfil",
+	as: "perfil",
+});
+
 const BASE_PROFILES = [
 	{
 		id_perfil: 1,
@@ -96,7 +102,8 @@ const BASE_PROFILES = [
 		id_perfil: 5,
 		codigo: "E",
 		nombre: "Emprendedor",
-		descripcion: "Interes por liderar, persuadir, coordinar y tomar decisiones.",
+		descripcion:
+			"Interes por liderar, persuadir, coordinar y tomar decisiones.",
 	},
 	{
 		id_perfil: 6,
@@ -144,6 +151,18 @@ const createTestResult = async (
 	);
 };
 
+const getResultDetailsByTestId = async (idTest) => {
+	return Resultado.findOne({
+		where: { id_test: idTest },
+		include: [
+			{
+				model: Perfil,
+				as: "perfil",
+			},
+		],
+	});
+};
+
 module.exports = {
 	BASE_PROFILES,
 	Perfil,
@@ -151,5 +170,6 @@ module.exports = {
 	ensureBaseProfiles,
 	getProfileByCode,
 	getResultByTestId,
+	getResultDetailsByTestId,
 	createTestResult,
 };

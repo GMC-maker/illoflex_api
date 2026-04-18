@@ -86,3 +86,27 @@ GET http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355
 
 ### Ver respuestas registradas de un test concreto por UUID
 GET http://localhost:3000/api/tests/6e514b56-f984-4a01-9d54-83da38958355/respuestas
+
+### ==========================================
+### ENLACE TEMPORAL DEL RESULTADO
+### ==========================================
+### Estos endpoints permiten generar un enlace temporal para recuperar
+### el resultado de un test finalizado sin crear una cuenta de usuario.
+### En esta fase el backend devuelve el token en JSON para poder probarlo.
+### Mas adelante se enviara por correo electronico.
+
+### 11. Crear enlace temporal para un resultado
+POST http://localhost:3000/api/resultados/4818b039-1c96-42d6-acda-da9780ebca95/enlace
+Content-Type: application/json
+
+{
+  "email": "prueba@example.com"
+}
+
+### 12. Recuperar resultado usando token temporal
+### Sustituye TOKEN_GENERADO por el token devuelto en la peticion anterior.
+GET http://localhost:3000/api/enlaces/TOKEN_GENERADO
+
+### 13. Probar validacion cuando falta el body del correo
+POST http://localhost:3000/api/resultados/1e89d723-bc62-4291-bad6-46ac77654e1b/enlace
+
