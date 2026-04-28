@@ -172,6 +172,7 @@ CREATE TABLE `enlace_resultado` (
   `id_enlace` bigint UNSIGNED NOT NULL,
   `id_test` bigint UNSIGNED NOT NULL,
   `email` varchar(150) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `token` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `token_hash` char(64) COLLATE utf8mb4_general_ci NOT NULL,
   `creado_en` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `expira_en` datetime NOT NULL,

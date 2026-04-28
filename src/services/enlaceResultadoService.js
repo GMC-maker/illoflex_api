@@ -198,7 +198,7 @@ const buildRecoveredResultResponse = async (resultDetails) => {
 	};
 };
 
-// Crea un enlace temporal para recuperar el resultado sin guardar el correo.
+// Crea un enlace temporal para recuperar el resultado asociandolo a un unico correo.
 const createTemporaryResultLink = async (uuid, email) => {
 	if (!email || !isValidEmail(email)) {
 		throw createServiceError("El correo electronico no tiene un formato valido", 400);
@@ -220,19 +220,53 @@ const createTemporaryResultLink = async (uuid, email) => {
 		throw createServiceError("El test no tiene resultado generado", 404);
 	}
 
+	const activeResultLink = await enlaceResultadoModel.getActiveResultLinkByTestId(
+		vocationalTest.id_test,
+	);
+
+	if (activeResultLink) {
+		if (activeResultLink.email && activeResultLink.email !== email) {
+			throw createServiceError(
+				"Este test ya tiene un enlace temporal asociado a otro correo",
+				409,
+			);
+		}
+
+		// Reutiliza el mismo enlace vigente para no crear tokens distintos del mismo test.
+		if (activeResultLink.token) {
+			return {
+				token: activeResultLink.token,
+				expira_en: activeResultLink.expira_en,
+				dias_validez: RESULT_LINK_EXPIRATION_DAYS,
+				reutilizado: true,
+			};
+		}
+	}
+
 	const token = generateResultToken();
 	const tokenHash = createTokenHash(token);
 	const expirationDate = createExpirationDate();
 
-	await enlaceResultadoModel.createResultLink({
-		idTest: vocationalTest.id_test,
-		tokenHash,
-		expirationDate,
-	});
+	if (activeResultLink) {
+		await enlaceResultadoModel.updateResultLink(activeResultLink, {
+			email,
+			token,
+			tokenHash,
+			expirationDate: activeResultLink.expira_en,
+		});
+	} else {
+		await enlaceResultadoModel.createResultLink({
+			idTest: vocationalTest.id_test,
+			email,
+			token,
+			tokenHash,
+			expirationDate,
+		});
+	}
 
 	return {
 		token,
-		expira_en: expirationDate,
+		expira_en: activeResultLink ? activeResultLink.expira_en : expirationDate,
 		dias_validez: RESULT_LINK_EXPIRATION_DAYS,
 	};
 };

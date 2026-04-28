@@ -2,7 +2,7 @@
  * Gestiona los enlaces temporales para recuperar
  * el resultado de un test anonimo por medio de token protegiendo el UUID original del test.
  */
-const { DataTypes } = require("sequelize");
+const { DataTypes, Op } = require("sequelize");
 const sequelize = require("../config/sequelize");
 
 const EnlaceResultado = sequelize.define(
@@ -19,6 +19,10 @@ const EnlaceResultado = sequelize.define(
 		},
 		email: {
 			type: DataTypes.STRING(150),
+			allowNull: true,
+		},
+		token: {
+			type: DataTypes.STRING(64),
 			allowNull: true,
 		},
 		token_hash: {
@@ -46,13 +50,27 @@ const EnlaceResultado = sequelize.define(
 	},
 );
 
-// Guarda un enlace temporal asociado a un test finalizado.
-const createResultLink = async ({ idTest, tokenHash, expirationDate }) => {
+// Guarda un enlace temporal asociado a un test finalizado con su correo y token visible.
+const createResultLink = async ({ idTest, email, token, tokenHash, expirationDate }) => {
 	return EnlaceResultado.create({
 		id_test: idTest,
-		email: null,
+		email,
+		token,
 		token_hash: tokenHash,
 		expira_en: expirationDate,
+	});
+};
+
+// Recupera el ultimo enlace que siga vigente para poder reutilizarlo si ya existe.
+const getActiveResultLinkByTestId = async (idTest) => {
+	return EnlaceResultado.findOne({
+		where: {
+			id_test: idTest,
+			expira_en: {
+				[Op.gt]: new Date(),
+			},
+		},
+		order: [["creado_en", "DESC"]],
 	});
 };
 
@@ -61,6 +79,20 @@ const getResultLinkByTokenHash = async (tokenHash) => {
 	return EnlaceResultado.findOne({
 		where: { token_hash: tokenHash },
 	});
+};
+
+// Actualiza un enlace ya creado cuando hace falta completar o refrescar sus datos visibles.
+const updateResultLink = async (
+	resultLink,
+	{ email, token, tokenHash, expirationDate },
+) => {
+	resultLink.email = email;
+	resultLink.token = token;
+	resultLink.token_hash = tokenHash;
+	resultLink.expira_en = expirationDate;
+	await resultLink.save();
+
+	return resultLink;
 };
 
 // Marca la primera vez que se usa el enlace, sin invalidarlo antes de caducar.
@@ -76,6 +108,8 @@ const markResultLinkAsUsed = async (resultLink) => {
 module.exports = {
 	EnlaceResultado,
 	createResultLink,
+	getActiveResultLinkByTestId,
 	getResultLinkByTokenHash,
+	updateResultLink,
 	markResultLinkAsUsed,
 };
