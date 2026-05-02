@@ -7,6 +7,7 @@ const enlaceResultadoModel = require("../models/enlaceResultadoModel");
 const resultadoModel = require("../models/resultadoModel");
 const testModel = require("../models/testModel");
 const resultadoRecomendacionRepository = require("../repositories/resultadoRecomendacionRepository");
+const { sendTemporaryResultLinkEmail } = require("./mailService");
 
 const RESULT_LINK_EXPIRATION_DAYS = 7;
 
@@ -234,6 +235,11 @@ const createTemporaryResultLink = async (uuid, email) => {
 
 		// Reutiliza el mismo enlace vigente para no crear tokens distintos del mismo test.
 		if (activeResultLink.token) {
+			await sendTemporaryResultLinkEmail({
+				email,
+				token: activeResultLink.token,
+			});
+
 			return {
 				token: activeResultLink.token,
 				expira_en: activeResultLink.expira_en,
@@ -241,6 +247,7 @@ const createTemporaryResultLink = async (uuid, email) => {
 				reutilizado: true,
 			};
 		}
+
 	}
 
 	const token = generateResultToken();
@@ -263,6 +270,11 @@ const createTemporaryResultLink = async (uuid, email) => {
 			expirationDate,
 		});
 	}
+	
+	await sendTemporaryResultLinkEmail({
+		email,
+		token,
+	});
 
 	return {
 		token,
