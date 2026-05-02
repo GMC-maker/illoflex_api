@@ -6,6 +6,7 @@ const express = require("express");
 const cors = require("cors");
 const indexRoutes = require("./routes/index.routes");
 const testRoute = require("./routes/testRoute");
+const enlaceResultadoRoute = require("./routes/enlaceResultadoRoute");
 
 const app = express();
 
@@ -17,5 +18,8 @@ app.use("/", indexRoutes);
 
 // Rutas REST del recurso test vocacional.
 app.use("/api/tests", testRoute);
+
+// Rutas REST para enlaces temporales de resultados.
+app.use("/api", enlaceResultadoRoute);
 
 module.exports = app;
