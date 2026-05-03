@@ -26,7 +26,13 @@ router.post("/:uuid/respuestas", testController.createTestResponse);
 // Recupera todas las respuestas guardadas para reconstruir el estado del test.
 router.get("/:uuid/respuestas", testController.getTestResponses);
 
-// Recupera un test anonimo existente a partir de su UUID.
+// Recupera el resultado ya generado de un test finalizado a partir de su UUID.
+//Esto sirve para refrescar la pantalla de resultados y leer textos actualizados desde BD
+router.get("/:uuid/resultado", testController.getTestResultByUuid);
+
+
+// Recupera un test anonimo existente a partir de su UUID. 
+//Recupera el test como entidad, sirve para saber si el test existe, esta en progreso o finalizado y para reconstruir el flujo.
 router.get("/:uuid", testController.getTestByUuid);
 
 // Crea un nuevo test anonimo y devuelve su UUID.

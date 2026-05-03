@@ -502,6 +502,90 @@ const getTestByUuid = async (uuid) => {
 	};
 };
 
+// Recupera el resultado ya generado de un test finalizado a partir de su UUID.
+const getTestResultByUuid = async (uuid) => {
+	const vocationalTest = await testModel.getTestByUuid(uuid);
+
+	if (!vocationalTest) {
+		throw createServiceError("Test no encontrado", 404);
+	}
+
+	if (vocationalTest.estado !== "FINALIZADO") {
+		throw createServiceError("El test todavia no tiene un resultado disponible", 409);
+	}
+
+	const resultDetails = await resultadoModel.getResultDetailsByTestId(
+		vocationalTest.id_test,
+	);
+
+	if (!resultDetails) {
+		throw createServiceError("Resultado no encontrado", 404);
+	}
+
+	const storedScores = resultDetails.puntuaciones_json || {};
+	const primaryProfile = resultDetails.perfil;
+
+	const secondaryProfile = storedScores.perfil_secundario
+		? await resultadoModel.getProfileByCode(storedScores.perfil_secundario.codigo)
+		: null;
+
+	const tertiaryProfile = storedScores.perfil_terciario
+		? await resultadoModel.getProfileByCode(storedScores.perfil_terciario.codigo)
+		: null;
+
+	const recommendationProfileIds = [
+		primaryProfile.id_perfil,
+		secondaryProfile?.id_perfil,
+		tertiaryProfile?.id_perfil,
+	].filter(Boolean);
+
+	const recommendedFamilies =
+		await resultadoRecomendacionRepository.getRecommendedFamiliesByProfileIds(
+			recommendationProfileIds,
+			3,
+		);
+
+	const recommendedCycles =
+		await resultadoRecomendacionRepository.getRecommendedCyclesByRiasecScores(
+			storedScores.normalizadas,
+		);
+
+	const groupedRecommendations = await buildGroupedRecommendations(
+		recommendedFamilies,
+		storedScores.normalizadas,
+	);
+
+	return {
+		id_resultado: resultDetails.id_resultado,
+		perfil_principal: {
+			codigo: primaryProfile.codigo,
+			nombre: primaryProfile.nombre,
+			descripcion: primaryProfile.descripcion,
+		},
+		perfil_secundario: secondaryProfile
+			? {
+					codigo: secondaryProfile.codigo,
+					nombre: secondaryProfile.nombre,
+					descripcion: secondaryProfile.descripcion,
+				}
+			: null,
+		perfil_terciario: tertiaryProfile
+			? {
+					codigo: tertiaryProfile.codigo,
+					nombre: tertiaryProfile.nombre,
+					descripcion: tertiaryProfile.descripcion,
+				}
+			: null,
+		puntuaciones: {
+			brutas: storedScores.brutas,
+			normalizadas: storedScores.normalizadas,
+		},
+		recomendaciones: groupedRecommendations,
+		familias_recomendadas: formatRecommendedFamilies(recommendedFamilies),
+		ciclos_recomendados: formatRecommendedCycles(recommendedCycles),
+	};
+};
+
 // Crea un nuevo test anonimo y genera el UUID que identificara ese intento.
 const createAnonymousTest = async () => {
 	// Cada intento del test se identifica con un UUID unico y anonimo.
@@ -522,5 +606,6 @@ module.exports = {
 	createTestResponse,
 	getTestResponses,
 	getTestByUuid,
+	getTestResultByUuid,
 	createAnonymousTest,
 };
