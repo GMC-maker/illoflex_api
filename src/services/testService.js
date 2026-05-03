@@ -42,17 +42,19 @@ const calculateAndRankProfiles = (
 		return acc;
 	}, {});
 
-	const profilesScoreMap = resultadoModel.BASE_PROFILES.reduce((acc, profile) => {
-		acc[profile.codigo] = {
-			codigo: profile.codigo,
-			nombre: profile.nombre,
-			descripcion: profile.descripcion,
-			puntuacion_bruta: 0,
-			total_opciones_activas: activeOptionsByCode[profile.codigo] || 0,
-			puntuacion_normalizada: 0,
-		};
-		return acc;
-	}, {});
+	const profilesScoreMap = resultadoModel.BASE_PROFILES.reduce(
+		(acc, profile) => {
+			acc[profile.codigo] = {
+				codigo: profile.codigo,
+				puntuacion_bruta: 0,
+				total_opciones_activas:
+					activeOptionsByCode[profile.codigo] || 0,
+				puntuacion_normalizada: 0,
+			};
+			return acc;
+		},
+		{},
+	);
 
 	for (const row of rawScoresByDimension) {
 		const code = row.codigo;
@@ -92,12 +94,12 @@ const buildResultScoreSummary = (rankedProfiles) => {
 		brutas: rawScoresByDimension,
 		normalizadas: normalizedScores,
 		ranking: rankedProfiles.map((score, index) => ({
-			posicion: index + 1,
-			codigo: score.codigo,
-			nombre: score.nombre,
-			puntuacion_bruta: score.puntuacion_bruta,
-			puntuacion_normalizada: score.puntuacion_normalizada,
+		posicion: index + 1,
+		codigo: score.codigo,
+		puntuacion_bruta: score.puntuacion_bruta,
+		puntuacion_normalizada: score.puntuacion_normalizada,
 		})),
+
 	};
 };
 
@@ -181,7 +183,9 @@ const validateCompletedTestResponses = async (idTest) => {
 // Completa el test, genera el resultado vocacional y deja persistido el resumen de puntuaciones.
 const completeTestGenerateResult = async (uuid) => {
 	const vocationalTest = await getOpenVocationalTestByUuid(uuid);
-	const existingResult = await resultadoModel.getResultByTestId(vocationalTest.id_test);
+	const existingResult = await resultadoModel.getResultByTestId(
+		vocationalTest.id_test,
+	);
 
 	if (existingResult) {
 		throw createServiceError("El test ya tiene un resultado generado", 409);
@@ -191,7 +195,7 @@ const completeTestGenerateResult = async (uuid) => {
 
 	const rawScoresByDimension =
 		await respuestaRepository.getRawScoresByDimensionForTest(
-		vocationalTest.id_test,
+			vocationalTest.id_test,
 		);
 	const totalOptionsPerDimension =
 		await respuestaRepository.getActiveOptionCountByDimension();
@@ -301,7 +305,8 @@ const completeTestGenerateResult = async (uuid) => {
 				normalizadas: storedScores.normalizadas,
 			},
 			recomendaciones: groupedRecommendations,
-			familias_recomendadas: formatRecommendedFamilies(recommendedFamilies),
+			familias_recomendadas:
+				formatRecommendedFamilies(recommendedFamilies),
 			ciclos_recomendados: formatRecommendedCycles(recommendedCycles),
 		};
 	});
@@ -360,10 +365,14 @@ const createTestResponse = async (uuid, responseData) => {
 
 	const vocationalTest = await getOpenVocationalTestByUuid(uuid);
 
-	const question = await respuestaRepository.getActiveQuestionById(idPregunta);
+	const question =
+		await respuestaRepository.getActiveQuestionById(idPregunta);
 
 	if (!question) {
-		throw createServiceError("La pregunta indicada no existe o no esta activa", 404);
+		throw createServiceError(
+			"La pregunta indicada no existe o no esta activa",
+			404,
+		);
 	}
 
 	const option = await respuestaRepository.getActiveOptionByQuestion(
@@ -381,9 +390,9 @@ const createTestResponse = async (uuid, responseData) => {
 	// El duplicado solo se comprueba dentro de la pregunta actual del test.
 	const existingResponse =
 		await respuestaRepository.getResponseByTestQuestionAndOption(
-		vocationalTest.id_test,
-		idPregunta,
-		idOpcion,
+			vocationalTest.id_test,
+			idPregunta,
+			idOpcion,
 		);
 
 	if (existingResponse) {
@@ -395,9 +404,9 @@ const createTestResponse = async (uuid, responseData) => {
 
 	const currentResponses =
 		await respuestaRepository.countResponsesByTestAndQuestion(
-		vocationalTest.id_test,
-		idPregunta,
-	);
+			vocationalTest.id_test,
+			idPregunta,
+		);
 
 	if (currentResponses >= 2) {
 		throw createServiceError(
@@ -511,7 +520,10 @@ const getTestResultByUuid = async (uuid) => {
 	}
 
 	if (vocationalTest.estado !== "FINALIZADO") {
-		throw createServiceError("El test todavia no tiene un resultado disponible", 409);
+		throw createServiceError(
+			"El test todavia no tiene un resultado disponible",
+			409,
+		);
 	}
 
 	const resultDetails = await resultadoModel.getResultDetailsByTestId(
@@ -526,11 +538,15 @@ const getTestResultByUuid = async (uuid) => {
 	const primaryProfile = resultDetails.perfil;
 
 	const secondaryProfile = storedScores.perfil_secundario
-		? await resultadoModel.getProfileByCode(storedScores.perfil_secundario.codigo)
+		? await resultadoModel.getProfileByCode(
+				storedScores.perfil_secundario.codigo,
+			)
 		: null;
 
 	const tertiaryProfile = storedScores.perfil_terciario
-		? await resultadoModel.getProfileByCode(storedScores.perfil_terciario.codigo)
+		? await resultadoModel.getProfileByCode(
+				storedScores.perfil_terciario.codigo,
+			)
 		: null;
 
 	const recommendationProfileIds = [

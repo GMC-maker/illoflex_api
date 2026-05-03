@@ -72,46 +72,12 @@ Resultado.belongsTo(Perfil, {
 });
 
 const BASE_PROFILES = [
-	{
-		id_perfil: 1,
-		codigo: "R",
-		nombre: "Realista",
-		descripcion: "Interes por actividades practicas, tecnicas y concretas.",
-	},
-	{
-		id_perfil: 2,
-		codigo: "I",
-		nombre: "Investigador",
-		descripcion:
-			"Interes por analizar, investigar, comprender y resolver problemas.",
-	},
-	{
-		id_perfil: 3,
-		codigo: "A",
-		nombre: "Artistico",
-		descripcion: "Interes por crear, disenar, expresar e innovar.",
-	},
-	{
-		id_perfil: 4,
-		codigo: "S",
-		nombre: "Social",
-		descripcion:
-			"Interes por ayudar, ensenar, acompanar y cooperar con otras personas.",
-	},
-	{
-		id_perfil: 5,
-		codigo: "E",
-		nombre: "Emprendedor",
-		descripcion:
-			"Interes por liderar, persuadir, coordinar y tomar decisiones.",
-	},
-	{
-		id_perfil: 6,
-		codigo: "C",
-		nombre: "Convencional",
-		descripcion:
-			"Interes por el orden, la estructura, la organizacion y los procedimientos.",
-	},
+	{ id_perfil: 1, codigo: "R" },
+	{ id_perfil: 2, codigo: "I" },
+	{ id_perfil: 3, codigo: "A" },
+	{ id_perfil: 4, codigo: "S" },
+	{ id_perfil: 5, codigo: "E" },
+	{ id_perfil: 6, codigo: "C" },
 ];
 
 const ensureBaseProfiles = async (transaction) => {
