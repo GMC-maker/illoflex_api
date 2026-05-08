@@ -1,0 +1,12 @@
+### Login admin interno
+POST http://localhost:3000/api/admin/login
+Content-Type: application/json
+
+{
+  "email": "admin@illoflex.local",
+  "password": "AdminIlloFlex2026!"
+}
+
+### Admin autenticado actual
+GET http://localhost:3000/api/admin/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbkBpbGxvZmxleC5sb2NhbCIsInJvbCI6IkFETUlOIiwiaWF0IjoxNzc4MjQ4NDQwLCJleHAiOjE3NzgyNzcyNDB9.yUdXKnqpikH_GghRNLcua-GeOJpcK19LAPqifwMKwy0

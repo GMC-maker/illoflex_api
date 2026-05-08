@@ -21,12 +21,15 @@ const requiredEnvVars = [
 	"DB_USER",
 	"DB_PASSWORD",
 	"DB_NAME",
+	"ADMIN_JWT_SECRET",
 ];
 
 // Valida que la aplicacion no arranque con configuracion incompleta.
 requiredEnvVars.forEach((envVarName) => {
 	if (!process.env[envVarName]) {
-		throw new Error(`Falta la variable de entorno obligatoria: ${envVarName}`);
+		throw new Error(
+			`Falta la variable de entorno obligatoria: ${envVarName}`,
+		);
 	}
 });
 
@@ -39,5 +42,11 @@ module.exports = {
 		user: process.env.DB_USER,
 		password: process.env.DB_PASSWORD,
 		name: process.env.DB_NAME,
+	},
+
+	// Configuracion especifica del JWT del area admin.
+	adminJwt: {
+		secret: process.env.ADMIN_JWT_SECRET,
+		expiresIn: process.env.ADMIN_JWT_EXPIRES_IN || "8h",
 	},
 };
