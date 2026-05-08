@@ -1,5 +1,5 @@
 /**
- * Valida el token Bearer de administracion y deja disponible el admin
+ * Valida la cookie de administracion y deja disponible el admin
  * autenticado en req.admin para el resto del flujo.
  */
 
@@ -9,17 +9,17 @@ const jwt = require("jsonwebtoken");
 // Carga la configuracion central para leer el secreto JWT.
 const config = require("../config/config");
 
-// Middleware que protege rutas admin comprobando el token.
+// Nombre de la cookie donde esperamos recibir el token del admin.
+const ADMIN_COOKIE_NAME = "admin_token";
+
+// Middleware que protege rutas admin comprobando la cookie del token.
 const authAdmin = (req, res, next) => {
 	try {
-		// Lee el header Authorization enviado por el cliente.
-		const authorizationHeader = req.headers.authorization || "";
+		// Lee el token JWT desde la cookie enviada por el navegador.
+		const token = req.cookies?.[ADMIN_COOKIE_NAME];
 
-		// Se espera el formato: "Bearer <token>"
-		const [scheme, token] = authorizationHeader.split(" ");
-
-		// Si no viene bien formado, corta la peticion con 401.
-		if (scheme !== "Bearer" || !token) {
+		// Si no existe la cookie, corta la peticion con 401.
+		if (!token) {
 			return res.status(401).json({
 				ok: false,
 				datos: null,

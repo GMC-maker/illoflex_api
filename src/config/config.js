@@ -36,6 +36,10 @@ requiredEnvVars.forEach((envVarName) => {
 module.exports = {
 	environment,
 	port: Number(process.env.PORT),
+
+	// URL del frontend autorizada para consumir la API.
+	frontendUrl: process.env.FRONTEND_URL,
+
 	db: {
 		host: process.env.DB_HOST,
 		port: Number(process.env.DB_PORT),
@@ -47,6 +51,6 @@ module.exports = {
 	// Configuracion especifica del JWT del area admin.
 	adminJwt: {
 		secret: process.env.ADMIN_JWT_SECRET,
-		expiresIn: process.env.ADMIN_JWT_EXPIRES_IN || "8h",
+		expiresIn: process.env.ADMIN_JWT_EXPIRES_IN || "2H",
 	},
 };

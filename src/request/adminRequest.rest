@@ -9,4 +9,6 @@ Content-Type: application/json
 
 ### Admin autenticado actual
 GET http://localhost:3000/api/admin/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbkBpbGxvZmxleC5sb2NhbCIsInJvbCI6IkFETUlOIiwiaWF0IjoxNzc4MjQ4NDQwLCJleHAiOjE3NzgyNzcyNDB9.yUdXKnqpikH_GghRNLcua-GeOJpcK19LAPqifwMKwy0
+
+### Logout admin
+POST http://localhost:3000/api/admin/logout
