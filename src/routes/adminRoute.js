@@ -9,6 +9,9 @@ const express = require("express");
 // Importa el controller que responde al login, al endpoint /me y al logout.
 const adminAuthController = require("../controllers/adminAuthController");
 
+// Importa el controller del CRUD minimo de familias profesionales.
+const adminFamiliaController = require("../controllers/adminFamiliaController");
+
 // Importa el middleware que valida la cookie del token admin.
 const authAdmin = require("../middlewares/authAdmin");
 
@@ -25,5 +28,14 @@ router.get("/me", adminAuthController.getCurrentAdmin);
 
 // Cierra la sesion admin eliminando la cookie del token.
 router.post("/logout", adminAuthController.logoutAdmin);
+
+// Recupera todas las familias profesionales.
+router.get("/familias", adminFamiliaController.getAllFamilies);
+
+// Crea una nueva familia profesional.
+router.post("/familias", adminFamiliaController.createFamily);
+
+// Actualiza una familia profesional existente.
+router.put("/familias/:idFamilia", adminFamiliaController.updateFamily);
 
 module.exports = router;
