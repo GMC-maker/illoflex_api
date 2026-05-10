@@ -31,5 +31,47 @@ Content-Type: application/json
   "descripcion": "Familia profesional actualizada desde el CRUD admin"
 }
 
+### Listar ciclos formativos
+GET http://localhost:3000/api/admin/ciclos
+
+### Crear ciclo formativo
+POST http://localhost:3000/api/admin/ciclos
+Content-Type: application/json
+
+{
+  "id_familia": 1,
+  "nombre": "Ciclo de prueba admin",
+  "nivel": "GS",
+  "descripcion": "Ciclo de prueba para validar el CRUD admin",
+  "duracion_horas": 2000
+}
+
+
+### Actualizar ciclo formativo
+PUT http://localhost:3000/api/admin/ciclos/1
+Content-Type: application/json
+
+{
+  "id_familia": 1,
+  "nombre": "Administracion de Sistemas Informaticos en Red",
+  "nivel": "GS",
+  "descripcion": "Ciclo actualizado desde el CRUD admin",
+  "duracion_horas": 2000
+}
+
+
+### Probar error por familia inexistente al crear ciclo
+POST http://localhost:3000/api/admin/ciclos
+Content-Type: application/json
+
+{
+  "id_familia": 9999,
+  "codigo_oficial": "ERR001",
+  "nombre": "Ciclo invalido",
+  "nivel": "Grado Superior",
+  "descripcion": "Debe fallar porque la familia no existe",
+  "duracion_horas": 2000
+}
+
 ### Logout admin
 POST http://localhost:3000/api/admin/logout

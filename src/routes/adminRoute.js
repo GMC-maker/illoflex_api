@@ -12,6 +12,9 @@ const adminAuthController = require("../controllers/adminAuthController");
 // Importa el controller del CRUD minimo de familias profesionales.
 const adminFamiliaController = require("../controllers/adminFamiliaController");
 
+// Importa el controller del CRUD minimo de ciclos formativos.
+const adminCicloController = require("../controllers/adminCicloController");
+
 // Importa el middleware que valida la cookie del token admin.
 const authAdmin = require("../middlewares/authAdmin");
 
@@ -37,5 +40,14 @@ router.post("/familias", adminFamiliaController.createFamily);
 
 // Actualiza una familia profesional existente.
 router.put("/familias/:idFamilia", adminFamiliaController.updateFamily);
+
+// Recupera todos los ciclos formativos.
+router.get("/ciclos", adminCicloController.getAllCiclos);
+
+// Crea un nuevo ciclo formativo.
+router.post("/ciclos", adminCicloController.createCiclo);
+
+// Actualiza un ciclo formativo existente.
+router.put("/ciclos/:idCiclo", adminCicloController.updateCiclo);
 
 module.exports = router;
