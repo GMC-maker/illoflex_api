@@ -51,6 +51,6 @@ module.exports = {
 	// Configuracion especifica del JWT del area admin.
 	adminJwt: {
 		secret: process.env.ADMIN_JWT_SECRET,
-		expiresIn: process.env.ADMIN_JWT_EXPIRES_IN || "2H",
+		expiresIn: process.env.ADMIN_JWT_EXPIRES_IN || "1H",
 	},
 };
