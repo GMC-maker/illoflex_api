@@ -1,0 +1,35 @@
+### Login admin interno
+POST http://localhost:3000/api/admin/login
+Content-Type: application/json
+
+{
+  "email": "admin@illoflex.local",
+  "password": "AdminIlloFlex2026!"
+}
+
+### Admin autenticado actual
+GET http://localhost:3000/api/admin/me
+
+### Listar familias profesionales
+GET http://localhost:3000/api/admin/familias
+
+### Crear familia profesional
+POST http://localhost:3000/api/admin/familias
+Content-Type: application/json
+
+{
+  "nombre": "Familia de prueba",
+  "descripcion": "Descripcion de prueba para validar el CRUD admin de familias"
+}
+
+### Actualizar familia profesional
+PUT http://localhost:3000/api/admin/familias/1
+Content-Type: application/json
+
+{
+  "nombre": "Actividades Fisicas y Deportivas",
+  "descripcion": "Familia profesional actualizada desde el CRUD admin"
+}
+
+### Logout admin
+POST http://localhost:3000/api/admin/logout
