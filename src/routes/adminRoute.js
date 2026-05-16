@@ -39,6 +39,12 @@ router.put("/ciclos/:idCiclo", adminCicloController.updateCiclo);
 // Recupera todas las preguntas del test con sus opciones asociadas.
 router.get("/preguntas", adminPreguntaController.getAllQuestions);
 
+// Recupera el resumen del banco activo de preguntas y dimensiones RIASEC.
+router.get("/preguntas/resumen", adminPreguntaController.getQuestionsSummary);
+
+// Activa o desactiva una pregunta existente y sincroniza sus opciones asociadas.
+router.patch("/preguntas/:idPregunta", adminPreguntaController.updateQuestionStatus);
+
 // Actualiza una pregunta existente con sus opciones asociadas.
 router.put("/preguntas/:idPregunta", adminPreguntaController.updateQuestion);
 

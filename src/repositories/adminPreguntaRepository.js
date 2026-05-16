@@ -49,6 +49,59 @@ const getAllQuestionsWithOptions = async () => {
 
 	return Array.from(questionMap.values());
 };
+
+const getQuestionsSummary = async () => {
+	const [activeQuestionRows] = await sequelize.query(`
+		SELECT COUNT(*) AS total_preguntas_activas
+		FROM pregunta
+		WHERE activa = 1
+	`);
+
+	const [activeOptionRows] = await sequelize.query(`
+		SELECT COUNT(*) AS total_opciones_activas
+		FROM opcion o
+		INNER JOIN pregunta p ON p.id_pregunta = o.id_pregunta
+		WHERE o.activa = 1
+		  AND p.activa = 1
+	`);
+
+	const [dimensionRows] = await sequelize.query(`
+		SELECT
+			d.codigo,
+			COUNT(p.id_pregunta) AS total_opciones_activas
+		FROM dimension_riasec d
+		LEFT JOIN opcion o
+			ON o.id_dimension = d.id_dimension
+			AND o.activa = 1
+		LEFT JOIN pregunta p
+			ON p.id_pregunta = o.id_pregunta
+			AND p.activa = 1
+		GROUP BY d.id_dimension, d.codigo
+		ORDER BY d.id_dimension ASC
+	`);
+
+	const dimensiones = {
+		R: 0,
+		I: 0,
+		A: 0,
+		S: 0,
+		E: 0,
+		C: 0,
+	};
+
+	for (const row of dimensionRows) {
+		dimensiones[row.codigo] = Number(row.total_opciones_activas);
+	}
+
+	return {
+		preguntas_activas: Number(
+			activeQuestionRows[0].total_preguntas_activas,
+		),
+		opciones_activas: Number(activeOptionRows[0].total_opciones_activas),
+		dimensiones,
+	};
+};
+
 const getQuestionByIdWithOptions = async (idPregunta, transaction = null) => {
 	return Pregunta.findOne({
 		where: { id_pregunta: idPregunta },
@@ -113,6 +166,7 @@ const updateOption = async (
 
 module.exports = {
 	getAllQuestionsWithOptions,
+	getQuestionsSummary,
 	getQuestionByIdWithOptions,
 	getDimensionByCode,
 	updateQuestion,

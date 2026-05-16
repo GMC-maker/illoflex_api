@@ -6,6 +6,10 @@ const getAllQuestions = async () => {
 	return adminPreguntaRepository.getAllQuestionsWithOptions();
 };
 
+const getQuestionsSummary = async () => {
+	return adminPreguntaRepository.getQuestionsSummary();
+};
+
 const createServiceError = (message, statusCode) => {
 	const error = new Error(message);
 	error.statusCode = statusCode;
@@ -133,5 +137,6 @@ const updateQuestion = async (idPregunta, datosRecibidos) => {
 //calculo o contador de tipos de preguntas:
 module.exports = {
 	getAllQuestions,
+	getQuestionsSummary,
 	updateQuestion,
 };

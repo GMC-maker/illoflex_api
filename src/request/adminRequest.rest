@@ -75,3 +75,6 @@ Content-Type: application/json
 
 ### Logout admin
 POST http://localhost:3000/api/admin/logout
+
+### Resumen del banco de preguntas activas
+GET http://localhost:3000/api/admin/preguntas/resumen
