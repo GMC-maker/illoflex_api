@@ -1,3 +1,4 @@
+const sequelize = require("../config/sequelize");
 const adminPreguntaRepository = require("../repositories/adminPreguntaRepository");
 
 //solo queremos obtener el listado de preguntas con sus respuestas asociadas.
@@ -42,78 +43,93 @@ const updateQuestion = async (idPregunta, datosRecibidos) => {
 	// });
 
 	//recupera la pregunta con sus opciones de la bbdd
-	const existingQuestion =
-		await adminPreguntaRepository.getQuestionByIdWithOptions(questionId);
-
-	if (!existingQuestion) {
-		throw createServiceError("Pregunta no encontrada", 404);
-	}
-
-	//para guardar las nuevas opciones asociadas a la pregunta
-	const opcionesPreparadas = [];
-
-	for (const opcion of opciones) {
-		const texto = opcion?.texto?.trim();
-		const dimensionCodigo = opcion?.dimension_codigo?.trim();
-
-		if (!texto) {
-			throw createServiceError(
-				"Todas las opciones deben tener un texto",
-				400,
+	return sequelize.transaction(async (transaction) => {
+		//recupera la pregunta con sus opciones de la bbdd
+		const existingQuestion =
+			await adminPreguntaRepository.getQuestionByIdWithOptions(
+				questionId,
+				transaction,
 			);
-		}
-		if (!dimensionCodigo) {
-			throw createServiceError(
-				"Todas las opciones deben tener un codigo RIASEC",
-				400,
-			);
+
+		if (!existingQuestion) {
+			throw createServiceError("Pregunta no encontrada", 404);
 		}
 
-		const dimension =
-			await adminPreguntaRepository.getDimensionByCode(dimensionCodigo);
+		//para guardar las nuevas opciones asociadas a la pregunta
+		const opcionesPreparadas = [];
 
-		if (!dimension) {
-			throw createServiceError(
-				`El codigo RIASEC ${dimensionCodigo} no es valido`,
-				400,
+		for (const opcion of opciones) {
+			const texto = opcion?.texto?.trim();
+			const dimensionCodigo = opcion?.dimension_codigo?.trim();
+
+			if (!texto) {
+				throw createServiceError(
+					"Todas las opciones deben tener un texto",
+					400,
+				);
+			}
+
+			if (!dimensionCodigo) {
+				throw createServiceError(
+					"Todas las opciones deben tener un codigo RIASEC",
+					400,
+				);
+			}
+
+			const dimension = await adminPreguntaRepository.getDimensionByCode(
+				dimensionCodigo,
+				transaction,
 			);
-		}
-		//guarda las nuevas opciones-
-		opcionesPreparadas.push({
-			id_opcion: opcion.id_opcion,
-			texto,
-			id_dimension: dimension.id_dimension,
-		});
-	}
-	// console.log("updateQuestion - opciones preparadas para guardar:", opcionesPreparadas);
-	
-	// actualiza primero la pregunta y despues las opciones asociadas updated con d
-	const updatedQuestion = await adminPreguntaRepository.updateQuestion(
-		existingQuestion,
-		{ enunciado },
-	);
 
-	for (const opcionPreparada of opcionesPreparadas) {
-		const existingOption = existingQuestion.opciones.find(
-			(opcion) => opcion.id_opcion === opcionPreparada.id_opcion,
+			if (!dimension) {
+				throw createServiceError(
+					`El codigo RIASEC ${dimensionCodigo} no es valido`,
+					400,
+				);
+			}
+
+			//guarda las nuevas opciones-
+			opcionesPreparadas.push({
+				id_opcion: opcion.id_opcion,
+				texto,
+				id_dimension: dimension.id_dimension,
+			});
+		}
+
+		// console.log("updateQuestion - opciones preparadas para guardar:", opcionesPreparadas);
+
+		// actualiza primero la pregunta y despues las opciones asociadas updated con d
+		const updatedQuestion = await adminPreguntaRepository.updateQuestion(
+			existingQuestion,
+			{ enunciado },
+			transaction,
 		);
 
-		if (!existingOption) {
-			throw createServiceError(
-				`La opcion ${opcionPreparada.id_opcion} no pertenece a esta pregunta`,
-				400,
+		for (const opcionPreparada of opcionesPreparadas) {
+			const existingOption = existingQuestion.opciones.find(
+				(opcion) => opcion.id_opcion === opcionPreparada.id_opcion,
+			);
+
+			if (!existingOption) {
+				throw createServiceError(
+					`La opcion ${opcionPreparada.id_opcion} no pertenece a esta pregunta`,
+					400,
+				);
+			}
+
+			await adminPreguntaRepository.updateOption(
+				existingOption,
+				{
+					texto: opcionPreparada.texto,
+					id_dimension: opcionPreparada.id_dimension,
+				},
+				transaction,
 			);
 		}
 
-		await adminPreguntaRepository.updateOption(existingOption, {
-			texto: opcionPreparada.texto,
-			id_dimension: opcionPreparada.id_dimension,
-		});
-	}
-
-	return updatedQuestion;
+		return updatedQuestion;
+	});
 };
-
 //calculo o contador de tipos de preguntas:
 module.exports = {
 	getAllQuestions,
