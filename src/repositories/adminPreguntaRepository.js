@@ -1,5 +1,5 @@
-
 const sequelize = require("../config/sequelize");
+const { Pregunta, Opcion } = require("../models/respuestaModel");
 
 const getAllQuestionsWithOptions = async () => {
 	const [rows] = await sequelize.query(`
@@ -49,5 +49,72 @@ const getAllQuestionsWithOptions = async () => {
 
 	return Array.from(questionMap.values());
 };
+const getQuestionByIdWithOptions = async (idPregunta, transaction = null) => {
+	return Pregunta.findOne({
+		where: { id_pregunta: idPregunta },
+		include: [
+			{
+				model: Opcion,
+				as: "opciones",
+				attributes: [
+					"id_opcion",
+					"id_pregunta",
+					"id_dimension",
+					"texto",
+					"activa",
+				],
+			},
+		],
+		order: [[{ model: Opcion, as: "opciones" }, "id_opcion", "ASC"]],
+		transaction,
+	});
+};
 
-module.exports = { getAllQuestionsWithOptions };
+// Recibe el codigo RIASEC enviado por el formulario ("R", "I", "A", etc.)
+// y lo traduce al id_dimension real guardado en base de datos.
+// El "?" de la consulta se sustituye por el codigo recibido desde el formulario.
+const getDimensionByCode = async (codigo, transaction = null) => {
+	const [rows] = await sequelize.query(
+		`
+			SELECT id_dimension, codigo, nombre
+			FROM dimension_riasec
+			WHERE codigo = ?
+			LIMIT 1
+		`,
+		{
+			replacements: [codigo],
+			transaction,
+		},
+	);
+
+	return rows[0] || null;
+};
+
+const updateQuestion = async (question, { enunciado }, transaction = null) => {
+	question.enunciado = enunciado;
+
+	await question.save({ transaction });
+
+	return question;
+};
+
+const updateOption = async (
+	option,
+	{ texto, id_dimension },
+	transaction = null,
+) => {
+	option.texto = texto;
+	option.id_dimension = id_dimension;
+
+	await option.save({ transaction });
+
+	return option;
+};
+
+module.exports = {
+	getAllQuestionsWithOptions,
+	getQuestionByIdWithOptions,
+	getDimensionByCode,
+	updateQuestion,
+	updateOption,
+};
