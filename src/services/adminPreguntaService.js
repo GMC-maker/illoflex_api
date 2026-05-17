@@ -1,11 +1,27 @@
 const sequelize = require("../config/sequelize");
 const adminPreguntaRepository = require("../repositories/adminPreguntaRepository");
 
+/**
+ * Recupera el listado completo de preguntas del area admin
+ * junto con sus opciones asociadas.
+ *
+ * @returns {Promise<Array<Object>>}
+ */
 //solo queremos obtener el listado de preguntas con sus respuestas asociadas.
 const getAllQuestions = async () => {
 	return adminPreguntaRepository.getAllQuestionsWithOptions();
 };
 
+/**
+ * Recupera el resumen actual del banco activo de preguntas,
+ * incluyendo preguntas activas, opciones activas y dimensiones RIASEC.
+ *
+ * @returns {Promise<{
+ *   preguntas_activas: number,
+ *   opciones_activas: number,
+ *   dimensiones: Object<string, number>
+ * }>}
+ */
 const getQuestionsSummary = async () => {
 	return adminPreguntaRepository.getQuestionsSummary();
 };
@@ -16,6 +32,14 @@ const createServiceError = (message, statusCode) => {
 	return error;
 };
 
+/**
+ * Valida el identificador de la pregunta y el estado activo recibido
+ * en el cambio de estado del area admin.
+ *
+ * @param {number|string} idPregunta
+ * @param {{activa: boolean}} datosRecibidos
+ * @returns {{preguntaId: number, activa: boolean}}
+ */
 // valida que idPregunta sea un numero valido y que activa sea boolean
 // prepara para convertir idPregunta a numero
 // devuelve ambos valores listos para usarlos despues
@@ -50,6 +74,14 @@ const verifyMinPreguntas = (summary) => {
 	}
 };
 
+/**
+ * Comprueba que al inactivar una pregunta ninguna dimension RIASEC
+ * quede sin opciones activas disponibles.
+ *
+ * @param {{dimensiones: Object<string, number>}} summary
+ * @param {string[]} dimensionCodes
+ * @returns {void}
+ */
 // valida que al inactivar la pregunta ninguna dimension quede vacia
 const verifyPreguntaDimension = (summary, dimensionCodes) => {
 	const dimensionesRestantes = { ...summary.dimensiones };
@@ -95,6 +127,19 @@ const getPreguntaStatusData = (pregunta) => {
 	};
 };
 
+/**
+ * Cambia el estado activo de una pregunta y de sus opciones asociadas
+ * respetando las reglas minimas del banco de preguntas del test.
+ *
+ * @param {number|string} idPregunta
+ * @param {{activa: boolean}} datosRecibidos
+ * @returns {Promise<{
+ *   id_pregunta: number,
+ *   enunciado: string,
+ *   orden: number,
+ *   activa: boolean
+ * }>}
+ */
 // cambia el estado de la pregunta y de sus opciones en una misma transaccion
 const updateQuestionStatus = async (idPregunta, datosRecibidos) => {
 	const { preguntaId, activa } = verifyPreguntaStatus(
@@ -167,6 +212,14 @@ const updateQuestionStatus = async (idPregunta, datosRecibidos) => {
 	});
 };
 
+/**
+ * Actualiza el enunciado de una pregunta y sus cuatro opciones asociadas,
+ * validando los codigos RIASEC y la pertenencia de cada opcion.
+ *
+ * @param {number|string} idPregunta
+ * @param {{enunciado: string, opciones: Array<Object>}} datosRecibidos
+ * @returns {Promise<Object>}
+ */
 const updateQuestion = async (idPregunta, datosRecibidos) => {
 	const questionId = Number(idPregunta);
 

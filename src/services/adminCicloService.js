@@ -31,6 +31,11 @@ const normalizeCicloResponse = (ciclo) => {
 	};
 };
 
+/**
+ * Recupera todos los ciclos formativos disponibles en el area admin.
+ *
+ * @returns {Promise<Array<Object>>}
+ */
 // Devuelve todos los ciclos formativos.
 const getAllCiclos = async () => {
 	const ciclos = await cicloRepository.getAllCiclos();
@@ -122,6 +127,13 @@ const findDuplicatedCiclo = (ciclos, cicloData, idCicloActual = null) => {
 	});
 };
 
+/**
+ * Crea un nuevo ciclo formativo validando familia asociada,
+ * duplicados simples y datos obligatorios del catalogo.
+ *
+ * @param {Object} datosRecibidos
+ * @returns {Promise<Object>}
+ */
 // Crea un nuevo ciclo formativo.
 const createCiclo = async (datosRecibidos) => {
 	const cicloData = validateCicloData(datosRecibidos);
@@ -158,6 +170,14 @@ const createCiclo = async (datosRecibidos) => {
 	return normalizeCicloResponse(savedCiclo);
 };
 
+/**
+ * Actualiza un ciclo formativo existente manteniendo las validaciones
+ * de familia asociada y posibles duplicados dentro del catalogo.
+ *
+ * @param {number|string} idCiclo
+ * @param {Object} datosRecibidos
+ * @returns {Promise<Object>}
+ */
 // Actualiza un ciclo formativo existente.
 const updateCiclo = async (idCiclo, datosRecibidos) => {
 	const cicloId = Number(idCiclo);
@@ -208,6 +228,12 @@ const updateCiclo = async (idCiclo, datosRecibidos) => {
 	return normalizeCicloResponse(updatedCiclo);
 };
 
+/**
+ * Elimina un ciclo formativo existente del catalogo admin.
+ *
+ * @param {number|string} idCiclo
+ * @returns {Promise<void>}
+ */
 // Elimina un ciclo formativo existente.
 const deleteCiclo = async (idCiclo) => {
 	const cicloId = Number(idCiclo);

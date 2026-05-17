@@ -32,6 +32,19 @@ const getOpenVocationalTestByUuid = async (uuid) => {
 	return vocationalTest;
 };
 
+/**
+ * Calcula y ordena las puntuaciones RIASEC combinando puntuacion bruta
+ * y puntuacion normalizada segun el numero de opciones activas.
+ *
+ * @param {Array<{codigo: string, puntuacion: number|string}>} rawScoresByDimension
+ * @param {Array<{codigo: string, total_opciones: number|string}>} totalOptionsPerDimension
+ * @returns {Array<{
+ *   codigo: string,
+ *   puntuacion_bruta: number,
+ *   total_opciones_activas: number,
+ *   puntuacion_normalizada: number
+ * }>}
+ */
 // Calcula y ordena los perfiles RIASEC a partir de las respuestas y las opciones activas.
 const calculateAndRankProfiles = (
 	rawScoresByDimension,
@@ -130,6 +143,14 @@ const formatRecommendedCycles = (cycles) => {
 	}));
 };
 
+/**
+ * Agrupa las recomendaciones principales para devolver familias
+ * con sus ciclos mas afines al perfil del usuario.
+ *
+ * @param {Array<Object>} families
+ * @param {Object<string, number>} normalizedScores
+ * @returns {Promise<Array<Object>>}
+ */
 // Agrupa las recomendaciones para mostrar pocas familias y pocos ciclos por cada una.
 const buildGroupedRecommendations = async (families, normalizedScores) => {
 	const topFamilies = families.slice(0, 3);
@@ -180,6 +201,13 @@ const validateCompletedTestResponses = async (idTest) => {
 	}
 };
 
+/**
+ * Finaliza un test en progreso, calcula el perfil vocacional
+ * y genera las recomendaciones asociadas.
+ *
+ * @param {string} uuid
+ * @returns {Promise<Object>}
+ */
 // Completa el test, genera el resultado vocacional y deja persistido el resumen de puntuaciones.
 const completeTestGenerateResult = async (uuid) => {
 	const vocationalTest = await getOpenVocationalTestByUuid(uuid);
@@ -314,6 +342,18 @@ const completeTestGenerateResult = async (uuid) => {
 	return result;
 };
 
+/**
+ * Recupera las preguntas activas del test con sus opciones visibles
+ * para que el frontend pueda recorrer el cuestionario.
+ *
+ * @param {string} uuid
+ * @returns {Promise<Array<{
+ *   id_pregunta: number,
+ *   enunciado: string,
+ *   orden: number,
+ *   opciones: Array<{id_opcion: number, texto: string}>
+ * }>>}
+ */
 // Devuelve las preguntas activas con sus opciones para que el frontend recorra el cuestionario.
 const getTestQuestions = async (uuid) => {
 	await getOpenVocationalTestByUuid(uuid);
@@ -330,6 +370,18 @@ const getTestQuestions = async (uuid) => {
 	}));
 };
 
+/**
+ * Recupera las respuestas ya registradas para reconstruir el estado
+ * actual del test en cliente.
+ *
+ * @param {string} uuid
+ * @returns {Promise<Array<{
+ *   id_respuesta: number,
+ *   id_pregunta: number,
+ *   id_opcion: number,
+ *   fecha_respuesta: Date
+ * }>>}
+ */
 // Recupera las respuestas ya guardadas para reconstruir el estado del test en cliente.
 const getTestResponses = async (uuid) => {
 	const vocationalTest = await testModel.getTestByUuid(uuid);
@@ -350,6 +402,14 @@ const getTestResponses = async (uuid) => {
 	}));
 };
 
+/**
+ * Registra una nueva respuesta del test validando la pregunta,
+ * la opcion y el limite maximo de 2 selecciones.
+ *
+ * @param {string} uuid
+ * @param {{id_pregunta: number, id_opcion: number}} responseData
+ * @returns {Promise<{id_respuesta: number, id_pregunta: number, id_opcion: number}>}
+ */
 // Registra una nueva respuesta validando que la opcion pertenezca a la pregunta y no duplique seleccion.
 // responseData contiene id_pregunta e id_opcion, representando los datos de una respuesta del test.
 const createTestResponse = async (uuid, responseData) => {
@@ -429,6 +489,15 @@ const createTestResponse = async (uuid, responseData) => {
 	};
 };
 
+/**
+ * Sustituye una respuesta existente por otra opcion valida
+ * de la misma pregunta dentro del mismo test.
+ *
+ * @param {string} uuid
+ * @param {number|string} idRespuesta
+ * @param {{id_opcion: number}} responseData
+ * @returns {Promise<{id_respuesta: number, id_pregunta: number, id_opcion: number}>}
+ */
 // Sustituye una respuesta existente por otra opcion valida de la misma pregunta.
 // responseData contiene id_opcion como dato necesario para sustituir una respuesta existente del test.
 const updateTestResponse = async (uuid, idRespuesta, responseData) => {
@@ -494,6 +563,17 @@ const updateTestResponse = async (uuid, idRespuesta, responseData) => {
 	};
 };
 
+/**
+ * Recupera la informacion minima de un test a partir de su UUID.
+ *
+ * @param {string} uuid
+ * @returns {Promise<{
+ *   uuid: string,
+ *   estado: string,
+ *   fecha_creacion: Date,
+ *   fecha_finalizacion: Date|null
+ * }|null>}
+ */
 // Recupera la informacion minima del test necesaria para continuar el flujo o consultar su estado.
 const getTestByUuid = async (uuid) => {
 	// Recupera la informacion minima necesaria para continuar el flujo del test.
@@ -511,6 +591,13 @@ const getTestByUuid = async (uuid) => {
 	};
 };
 
+/**
+ * Recupera el resultado ya generado de un test finalizado,
+ * incluyendo perfiles y recomendaciones formativas.
+ *
+ * @param {string} uuid
+ * @returns {Promise<Object>}
+ */
 // Recupera el resultado ya generado de un test finalizado a partir de su UUID.
 const getTestResultByUuid = async (uuid) => {
 	const vocationalTest = await testModel.getTestByUuid(uuid);
@@ -602,6 +689,11 @@ const getTestResultByUuid = async (uuid) => {
 	};
 };
 
+/**
+ * Crea un nuevo test vocacional anonimo y devuelve su identificador.
+ *
+ * @returns {Promise<{uuid: string, estado: string}>}
+ */
 // Crea un nuevo test anonimo y genera el UUID que identificara ese intento.
 const createAnonymousTest = async () => {
 	// Cada intento del test se identifica con un UUID unico y anonimo.

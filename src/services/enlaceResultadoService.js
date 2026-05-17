@@ -69,6 +69,14 @@ const formatRecommendedCycles = (cycles) => {
 	}));
 };
 
+/**
+ * Agrupa las recomendaciones principales para devolver familias
+ * con sus ciclos mas afines al perfil recuperado.
+ *
+ * @param {Array<Object>} families
+ * @param {Object<string, number>} normalizedScores
+ * @returns {Promise<Array<Object>>}
+ */
 // Agrupa recomendaciones para mostrar familias con sus ciclos candidatos.
 const buildGroupedRecommendations = async (families, normalizedScores) => {
 	const groupedRecommendations = [];
@@ -128,6 +136,13 @@ const getProfileResponseByCode = async (storedProfile) => {
 	};
 };
 
+/**
+ * Construye la respuesta completa del resultado recuperado
+ * a partir del detalle persistido en la base de datos.
+ *
+ * @param {Object} resultDetails
+ * @returns {Promise<Object>}
+ */
 // Construye una respuesta compatible con la pantalla actual de resultado.
 const buildRecoveredResultResponse = async (resultDetails) => {
 	const storedScores = getStoredScores(resultDetails.puntuaciones_json);
@@ -199,6 +214,19 @@ const buildRecoveredResultResponse = async (resultDetails) => {
 	};
 };
 
+/**
+ * Genera o reutiliza un enlace temporal para un test finalizado
+ * y envia el acceso al correo indicado.
+ *
+ * @param {string} uuid
+ * @param {string} email
+ * @returns {Promise<{
+ *   token: string,
+ *   expira_en: Date,
+ *   dias_validez: number,
+ *   reutilizado?: boolean
+ * }>}
+ */
 // Crea un enlace temporal para recuperar el resultado asociandolo a un unico correo.
 const createTemporaryResultLink = async (uuid, email) => {
 	if (!email || !isValidEmail(email)) {
@@ -283,6 +311,12 @@ const createTemporaryResultLink = async (uuid, email) => {
 	};
 };
 
+/**
+ * Recupera el resultado asociado a un token temporal valido.
+ *
+ * @param {string} token
+ * @returns {Promise<Object>}
+ */
 // Recupera el resultado asociado a un token temporal valido.
 const getResultByTemporaryToken = async (token) => {
 	if (!token) {

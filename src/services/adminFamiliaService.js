@@ -21,6 +21,11 @@ const normalizeFamilyResponse = (family) => {
 	};
 };
 
+/**
+ * Recupera todas las familias profesionales disponibles en el area admin.
+ *
+ * @returns {Promise<Array<Object>>}
+ */
 // Devuelve todas las familias profesionales.
 const getAllFamilies = async () => {
 	const families = await familiaRepository.getAllFamilies();
@@ -46,6 +51,13 @@ const validateFamilyData = (datosRecibidos) => {
 	};
 };
 
+/**
+ * Crea una nueva familia profesional validando nombre obligatorio
+ * y evitando duplicados simples dentro del catalogo.
+ *
+ * @param {Object} datosRecibidos
+ * @returns {Promise<Object>}
+ */
 // Crea una nueva familia profesional.
 const createFamily = async (datosRecibidos) => {
 	const familyData = validateFamilyData(datosRecibidos);
@@ -70,6 +82,14 @@ const createFamily = async (datosRecibidos) => {
 	return normalizeFamilyResponse(createdFamily);
 };
 
+/**
+ * Actualiza una familia profesional existente manteniendo las validaciones
+ * de identificador y nombre unico dentro del catalogo.
+ *
+ * @param {number|string} idFamilia
+ * @param {Object} datosRecibidos
+ * @returns {Promise<Object>}
+ */
 // Actualiza una familia profesional existente.
 const updateFamily = async (idFamilia, datosRecibidos) => {
 	const familyId = Number(idFamilia);
@@ -110,6 +130,12 @@ const updateFamily = async (idFamilia, datosRecibidos) => {
 	return normalizeFamilyResponse(updatedFamily);
 };
 
+/**
+ * Elimina una familia profesional solo si no tiene ciclos asociados.
+ *
+ * @param {number|string} idFamilia
+ * @returns {Promise<void>}
+ */
 // Elimina una familia profesional existente.
 const deleteFamily = async (idFamilia) => {
 	const familyId = Number(idFamilia);
