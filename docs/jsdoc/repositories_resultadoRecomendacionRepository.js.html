@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: repositories/resultadoRecomendacionRepository.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: repositories/resultadoRecomendacionRepository.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Consulta el catalogo formativo para construir recomendaciones asociadas
+ * al resultado vocacional del test.
+ */
+const sequelize = require("../config/sequelize");
+
+// Busca familias profesionales afines a los perfiles RIASEC mejor posicionados.
+const getRecommendedFamiliesByProfileIds = async (profileIds, limit = 6) => {
+	if (!profileIds || profileIds.length === 0) {
+		return [];
+	}
+
+	const [rows] = await sequelize.query(
+		`
+			SELECT
+				f.id_familia,
+				f.nombre,
+				f.descripcion,
+				MAX(pfa.grado_afinidad) AS grado_afinidad
+			FROM perfil_familia_afinidad pfa
+			INNER JOIN familia_fp f ON f.id_familia = pfa.id_familia
+			WHERE pfa.id_perfil IN (:profileIds)
+			GROUP BY f.id_familia, f.nombre, f.descripcion
+			ORDER BY grado_afinidad DESC, f.nombre ASC
+			LIMIT :limit
+		`,
+		{
+			replacements: { profileIds, limit },
+		},
+	);
+
+	return rows;
+};
+
+// Calcula ciclos recomendados comparando los puntajes RIASEC del ciclo con el resultado del test.
+const getRecommendedCyclesByRiasecScores = async (normalizedScores, limit = 8) => {
+	if (!normalizedScores) {
+		return [];
+	}
+
+	const [rows] = await sequelize.query(
+		`
+			SELECT
+				c.id_ciclo,
+				c.id_familia,
+				c.codigo_oficial,
+				c.nombre,
+				c.nivel,
+				c.descripcion,
+				c.duracion_horas,
+				f.nombre AS familia_nombre,
+				(
+					cra.puntaje_r * :scoreR +
+					cra.puntaje_i * :scoreI +
+					cra.puntaje_a * :scoreA +
+					cra.puntaje_s * :scoreS +
+					cra.puntaje_e * :scoreE +
+					cra.puntaje_c * :scoreC
+				) AS afinidad_riasec
+			FROM ciclo_riasec_afinidad cra
+			INNER JOIN ciclo_formativo c ON c.id_ciclo = cra.id_ciclo
+			INNER JOIN familia_fp f ON f.id_familia = c.id_familia
+			ORDER BY afinidad_riasec DESC, c.nombre ASC
+			LIMIT :limit
+		`,
+		{
+			replacements: {
+				scoreR: Number(normalizedScores.R || 0),
+				scoreI: Number(normalizedScores.I || 0),
+				scoreA: Number(normalizedScores.A || 0),
+				scoreS: Number(normalizedScores.S || 0),
+				scoreE: Number(normalizedScores.E || 0),
+				scoreC: Number(normalizedScores.C || 0),
+				limit,
+			},
+		},
+	);
+
+	return rows;
+};
+
+// Busca ciclos candidatos dentro de una familia concreta usando las puntuaciones RIASEC del test.
+const getRecommendedCyclesByFamilyAndRiasecScores = async (
+	idFamilia,
+	normalizedScores,
+	limit = 3,
+) => {
+	if (!idFamilia || !normalizedScores) {
+		return [];
+	}
+
+	const [rows] = await sequelize.query(
+		`
+			SELECT
+				c.id_ciclo,
+				c.id_familia,
+				c.codigo_oficial,
+				c.nombre,
+				c.nivel,
+				c.descripcion,
+				c.duracion_horas,
+				f.nombre AS familia_nombre,
+				(
+					cra.puntaje_r * :scoreR +
+					cra.puntaje_i * :scoreI +
+					cra.puntaje_a * :scoreA +
+					cra.puntaje_s * :scoreS +
+					cra.puntaje_e * :scoreE +
+					cra.puntaje_c * :scoreC
+				) AS afinidad_riasec
+			FROM ciclo_riasec_afinidad cra
+			INNER JOIN ciclo_formativo c ON c.id_ciclo = cra.id_ciclo
+			INNER JOIN familia_fp f ON f.id_familia = c.id_familia
+			WHERE c.id_familia = :idFamilia
+			ORDER BY afinidad_riasec DESC, c.nombre ASC
+			LIMIT :limit
+		`,
+		{
+			replacements: {
+				idFamilia,
+				scoreR: Number(normalizedScores.R || 0),
+				scoreI: Number(normalizedScores.I || 0),
+				scoreA: Number(normalizedScores.A || 0),
+				scoreS: Number(normalizedScores.S || 0),
+				scoreE: Number(normalizedScores.E || 0),
+				scoreC: Number(normalizedScores.C || 0),
+				limit,
+			},
+		},
+	);
+
+	return rows;
+};
+
+module.exports = {
+	getRecommendedFamiliesByProfileIds,
+	getRecommendedCyclesByRiasecScores,
+	getRecommendedCyclesByFamilyAndRiasecScores,
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#adminCicloService">adminCicloService</a></li><li><a href="global.html#adminFamiliaService">adminFamiliaService</a></li><li><a href="global.html#adminPreguntaService">adminPreguntaService</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#buildGroupedRecommendations">buildGroupedRecommendations</a></li><li><a href="global.html#buildRecoveredResultResponse">buildRecoveredResultResponse</a></li><li><a href="global.html#calculateAndRankProfiles">calculateAndRankProfiles</a></li><li><a href="global.html#cicloRepository">cicloRepository</a></li><li><a href="global.html#completeTestGenerateResult">completeTestGenerateResult</a></li><li><a href="global.html#createAnonymousTest">createAnonymousTest</a></li><li><a href="global.html#createCiclo">createCiclo</a></li><li><a href="global.html#createFamily">createFamily</a></li><li><a href="global.html#createTemporaryResultLink">createTemporaryResultLink</a></li><li><a href="global.html#createTestResponse">createTestResponse</a></li><li><a href="global.html#crypto">crypto</a></li><li><a href="global.html#deleteCiclo">deleteCiclo</a></li><li><a href="global.html#deleteFamily">deleteFamily</a></li><li><a href="global.html#enlaceResultadoService">enlaceResultadoService</a></li><li><a href="global.html#express">express</a></li><li><a href="global.html#familiaRepository">familiaRepository</a></li><li><a href="global.html#getAllCiclos">getAllCiclos</a></li><li><a href="global.html#getAllFamilies">getAllFamilies</a></li><li><a href="global.html#getAllQuestions">getAllQuestions</a></li><li><a href="global.html#getQuestionsSummary">getQuestionsSummary</a></li><li><a href="global.html#getResultByTemporaryToken">getResultByTemporaryToken</a></li><li><a href="global.html#getTestByUuid">getTestByUuid</a></li><li><a href="global.html#getTestQuestions">getTestQuestions</a></li><li><a href="global.html#getTestResponses">getTestResponses</a></li><li><a href="global.html#getTestResultByUuid">getTestResultByUuid</a></li><li><a href="global.html#mysql">mysql</a></li><li><a href="global.html#path">path</a></li><li><a href="global.html#sequelize">sequelize</a></li><li><a href="global.html#testService">testService</a></li><li><a href="global.html#updateCiclo">updateCiclo</a></li><li><a href="global.html#updateFamily">updateFamily</a></li><li><a href="global.html#updateQuestion">updateQuestion</a></li><li><a href="global.html#updateQuestionStatus">updateQuestionStatus</a></li><li><a href="global.html#updateTestResponse">updateTestResponse</a></li><li><a href="global.html#verifyPreguntaDimension">verifyPreguntaDimension</a></li><li><a href="global.html#verifyPreguntaStatus">verifyPreguntaStatus</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon May 18 2026 00:43:26 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

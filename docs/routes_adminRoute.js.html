@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: routes/adminRoute.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: routes/adminRoute.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Son las rutas HTTP del area admin para autenticacion
+ * y comprobacion del administrador autenticado.
+ */
+const express = require("express");
+const router = express.Router();
+
+// Importa el controller que responde al login, al endpoint /me y al logout.
+const adminAuthController = require("../controllers/adminAuthController");
+const adminFamiliaController = require("../controllers/adminFamiliaController");
+const adminCicloController = require("../controllers/adminCicloController");
+const adminPreguntaController = require("../controllers/adminPreguntaController");
+
+// Importa el middleware que valida la cookie del token admin.
+const authAdmin = require("../middlewares/authAdmin");
+
+// Permite iniciar sesion en el area interna con credenciales admin.
+router.post("/login", adminAuthController.loginAdmin);
+
+// A partir de aqui, el resto de rutas admin requieren JWT valido en cookie.
+router.use(authAdmin);
+
+// Devuelve el administrador autenticado a partir de la cookie recibida.
+router.get("/me", adminAuthController.getCurrentAdmin);
+
+// Cierra la sesion admin eliminando la cookie del token.
+router.post("/logout", adminAuthController.logoutAdmin);
+
+// Recuperar, crear y actualizar las familias profesionales.
+router.get("/familias", adminFamiliaController.getAllFamilies);
+router.post("/familias", adminFamiliaController.createFamily);
+router.put("/familias/:idFamilia", adminFamiliaController.updateFamily);
+router.delete("/familias/:idFamilia", adminFamiliaController.deleteFamily);
+
+// Recupera, crear y actualizar todos los ciclos formativos.
+router.get("/ciclos", adminCicloController.getAllCiclos);
+router.post("/ciclos", adminCicloController.createCiclo);
+router.put("/ciclos/:idCiclo", adminCicloController.updateCiclo);
+router.delete("/ciclos/:idCiclo", adminCicloController.deleteCiclo);
+
+// Recupera todas las preguntas del test con sus opciones asociadas.
+router.get("/preguntas", adminPreguntaController.getAllQuestions);
+
+// Recupera el resumen del banco activo de preguntas y dimensiones RIASEC.
+router.get("/preguntas/resumen", adminPreguntaController.getQuestionsSummary);
+
+// Activa o desactiva una pregunta existente y sincroniza sus opciones asociadas.
+router.patch("/preguntas/:idPregunta", adminPreguntaController.updateQuestionStatus);
+
+// Actualiza una pregunta existente con sus opciones asociadas.
+router.put("/preguntas/:idPregunta", adminPreguntaController.updateQuestion);
+
+module.exports = router;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#adminCicloService">adminCicloService</a></li><li><a href="global.html#adminFamiliaService">adminFamiliaService</a></li><li><a href="global.html#adminPreguntaService">adminPreguntaService</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#buildGroupedRecommendations">buildGroupedRecommendations</a></li><li><a href="global.html#buildRecoveredResultResponse">buildRecoveredResultResponse</a></li><li><a href="global.html#calculateAndRankProfiles">calculateAndRankProfiles</a></li><li><a href="global.html#cicloRepository">cicloRepository</a></li><li><a href="global.html#completeTestGenerateResult">completeTestGenerateResult</a></li><li><a href="global.html#createAnonymousTest">createAnonymousTest</a></li><li><a href="global.html#createCiclo">createCiclo</a></li><li><a href="global.html#createFamily">createFamily</a></li><li><a href="global.html#createTemporaryResultLink">createTemporaryResultLink</a></li><li><a href="global.html#createTestResponse">createTestResponse</a></li><li><a href="global.html#crypto">crypto</a></li><li><a href="global.html#deleteCiclo">deleteCiclo</a></li><li><a href="global.html#deleteFamily">deleteFamily</a></li><li><a href="global.html#enlaceResultadoService">enlaceResultadoService</a></li><li><a href="global.html#express">express</a></li><li><a href="global.html#familiaRepository">familiaRepository</a></li><li><a href="global.html#getAllCiclos">getAllCiclos</a></li><li><a href="global.html#getAllFamilies">getAllFamilies</a></li><li><a href="global.html#getAllQuestions">getAllQuestions</a></li><li><a href="global.html#getQuestionsSummary">getQuestionsSummary</a></li><li><a href="global.html#getResultByTemporaryToken">getResultByTemporaryToken</a></li><li><a href="global.html#getTestByUuid">getTestByUuid</a></li><li><a href="global.html#getTestQuestions">getTestQuestions</a></li><li><a href="global.html#getTestResponses">getTestResponses</a></li><li><a href="global.html#getTestResultByUuid">getTestResultByUuid</a></li><li><a href="global.html#mysql">mysql</a></li><li><a href="global.html#path">path</a></li><li><a href="global.html#sequelize">sequelize</a></li><li><a href="global.html#testService">testService</a></li><li><a href="global.html#updateCiclo">updateCiclo</a></li><li><a href="global.html#updateFamily">updateFamily</a></li><li><a href="global.html#updateQuestion">updateQuestion</a></li><li><a href="global.html#updateQuestionStatus">updateQuestionStatus</a></li><li><a href="global.html#updateTestResponse">updateTestResponse</a></li><li><a href="global.html#verifyPreguntaDimension">verifyPreguntaDimension</a></li><li><a href="global.html#verifyPreguntaStatus">verifyPreguntaStatus</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon May 18 2026 00:40:38 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
