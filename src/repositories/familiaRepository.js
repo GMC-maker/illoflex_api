@@ -34,9 +34,15 @@ const updateFamily = async (family, { nombre, descripcion }) => {
 	return family;
 };
 
+// Elimina una familia profesional existente.
+const deleteFamily = async (family) => {
+	await family.destroy();
+};
+
 module.exports = {
 	getAllFamilies,
 	getFamilyById,
 	createFamily,
 	updateFamily,
+	deleteFamily,
 };
