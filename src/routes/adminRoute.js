@@ -35,6 +35,7 @@ router.put("/familias/:idFamilia", adminFamiliaController.updateFamily);
 router.get("/ciclos", adminCicloController.getAllCiclos);
 router.post("/ciclos", adminCicloController.createCiclo);
 router.put("/ciclos/:idCiclo", adminCicloController.updateCiclo);
+router.delete("/ciclos/:idCiclo", adminCicloController.deleteCiclo);
 
 // Recupera todas las preguntas del test con sus opciones asociadas.
 router.get("/preguntas", adminPreguntaController.getAllQuestions);
