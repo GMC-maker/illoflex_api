@@ -78,3 +78,20 @@ POST http://localhost:3000/api/admin/logout
 
 ### Resumen del banco de preguntas activas
 GET http://localhost:3000/api/admin/preguntas/resumen
+
+
+### Inactivar una pregunta del test
+PATCH http://localhost:3000/api/admin/preguntas/18
+Content-Type: application/json
+
+{
+  "activa": false
+}
+
+### Reactivar una pregunta del test
+PATCH http://localhost:3000/api/admin/preguntas/18
+Content-Type: application/json
+
+{
+  "activa": true
+}

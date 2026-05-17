@@ -50,35 +50,45 @@ const getAllQuestionsWithOptions = async () => {
 	return Array.from(questionMap.values());
 };
 
-const getQuestionsSummary = async () => {
-	const [activeQuestionRows] = await sequelize.query(`
-		SELECT COUNT(*) AS total_preguntas_activas
-		FROM pregunta
-		WHERE activa = 1
-	`);
+// obtiene el resumen actual de preguntas activas, opciones activas y dimensiones
+const getQuestionsSummary = async (transaction = null) => {
+	const [activeQuestionRows] = await sequelize.query(
+		`
+			SELECT COUNT(*) AS total_preguntas_activas
+			FROM pregunta
+			WHERE activa = 1
+		`,
+		{ transaction },
+	);
 
-	const [activeOptionRows] = await sequelize.query(`
-		SELECT COUNT(*) AS total_opciones_activas
-		FROM opcion o
-		INNER JOIN pregunta p ON p.id_pregunta = o.id_pregunta
-		WHERE o.activa = 1
-		  AND p.activa = 1
-	`);
+	const [activeOptionRows] = await sequelize.query(
+		`
+			SELECT COUNT(*) AS total_opciones_activas
+			FROM opcion o
+			INNER JOIN pregunta p ON p.id_pregunta = o.id_pregunta
+			WHERE o.activa = 1
+			  AND p.activa = 1
+		`,
+		{ transaction },
+	);
 
-	const [dimensionRows] = await sequelize.query(`
-		SELECT
-			d.codigo,
-			COUNT(p.id_pregunta) AS total_opciones_activas
-		FROM dimension_riasec d
-		LEFT JOIN opcion o
-			ON o.id_dimension = d.id_dimension
-			AND o.activa = 1
-		LEFT JOIN pregunta p
-			ON p.id_pregunta = o.id_pregunta
-			AND p.activa = 1
-		GROUP BY d.id_dimension, d.codigo
-		ORDER BY d.id_dimension ASC
-	`);
+	const [dimensionRows] = await sequelize.query(
+		`
+			SELECT
+				d.codigo,
+				COUNT(p.id_pregunta) AS total_opciones_activas
+			FROM dimension_riasec d
+			LEFT JOIN opcion o
+				ON o.id_dimension = d.id_dimension
+				AND o.activa = 1
+			LEFT JOIN pregunta p
+				ON p.id_pregunta = o.id_pregunta
+				AND p.activa = 1
+			GROUP BY d.id_dimension, d.codigo
+			ORDER BY d.id_dimension ASC
+		`,
+		{ transaction },
+	);
 
 	const dimensiones = {
 		R: 0,
@@ -100,6 +110,27 @@ const getQuestionsSummary = async () => {
 		opciones_activas: Number(activeOptionRows[0].total_opciones_activas),
 		dimensiones,
 	};
+};
+
+// obtiene los codigos RIASEC de las opciones activas de una pregunta
+const getPreguntaDimensionCodes = async (idPregunta, transaction = null) => {
+	const [rows] = await sequelize.query(
+		`
+			SELECT d.codigo
+			FROM opcion o
+			INNER JOIN dimension_riasec d
+				ON d.id_dimension = o.id_dimension
+			WHERE o.id_pregunta = ?
+			  AND o.activa = 1
+			ORDER BY o.id_opcion ASC
+		`,
+		{
+			replacements: [idPregunta],
+			transaction,
+		},
+	);
+
+	return rows.map((row) => row.codigo);
 };
 
 const getQuestionByIdWithOptions = async (idPregunta, transaction = null) => {
@@ -151,6 +182,15 @@ const updateQuestion = async (question, { enunciado }, transaction = null) => {
 	return question;
 };
 
+// actualiza el estado activa de la pregunta
+const updatePreguntaStatus = async (question, activa, transaction = null) => {
+	question.activa = activa;
+
+	await question.save({ transaction });
+
+	return question;
+};
+
 const updateOption = async (
 	option,
 	{ texto, id_dimension },
@@ -164,11 +204,29 @@ const updateOption = async (
 	return option;
 };
 
+// actualiza el estado activa de las opciones de una pregunta
+const updateOpcionesStatus = async (
+	idPregunta,
+	activa,
+	transaction = null,
+) => {
+	await Opcion.update(
+		{ activa },
+		{
+			where: { id_pregunta: idPregunta },
+			transaction,
+		},
+	);
+};
+
 module.exports = {
 	getAllQuestionsWithOptions,
 	getQuestionsSummary,
+	getPreguntaDimensionCodes,
 	getQuestionByIdWithOptions,
 	getDimensionByCode,
 	updateQuestion,
+	updatePreguntaStatus,
 	updateOption,
+	updateOpcionesStatus,
 };
