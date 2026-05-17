@@ -11,6 +11,7 @@ const FamiliaFp = sequelize.define(
 		id_familia: {
 			type: DataTypes.SMALLINT.UNSIGNED,
 			primaryKey: true,
+			autoIncrement: true,
 		},
 		nombre: {
 			type: DataTypes.STRING(120),
@@ -33,6 +34,7 @@ const CicloFormativo = sequelize.define(
 		id_ciclo: {
 			type: DataTypes.INTEGER.UNSIGNED,
 			primaryKey: true,
+			autoIncrement: true,
 		},
 		id_familia: {
 			type: DataTypes.SMALLINT.UNSIGNED,

@@ -110,3 +110,5 @@ GET http://localhost:3000/api/enlaces/TOKEN_GENERADO
 ### 13. Probar validacion cuando falta el body del correo
 POST http://localhost:3000/api/resultados/1e89d723-bc62-4291-bad6-46ac77654e1b/enlace
 
+### 14. Probando un test el con sus resultados
+GET http://localhost:3000/api/tests/d43b62e9-e13b-465a-9852-0ab45c5b4ed3/resultado

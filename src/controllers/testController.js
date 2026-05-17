@@ -138,6 +138,25 @@ const getTestByUuid = async (req, res) => {
 	}
 };
 
+// Recupera el resultado de un test finalizado a partir de su UUID.
+const getTestResultByUuid = async (req, res) => {
+	try {
+		const result = await testService.getTestResultByUuid(req.params.uuid);
+
+		return res.status(200).json({
+			ok: true,
+			datos: result,
+			mensaje: "Resultado recuperado correctamente",
+		});
+	} catch (error) {
+		return res.status(error.statusCode || 500).json({
+			ok: false,
+			datos: null,
+			mensaje: error.message || "No se pudo recuperar el resultado",
+		});
+	}
+};
+
 // Inicia un nuevo test anonimo y devuelve el identificador con el que seguira el flujo.
 const createAnonymousTest = async (req, res) => {
 	try {
@@ -165,5 +184,6 @@ module.exports = {
 	createTestResponse,
 	getTestResponses,
 	getTestByUuid,
+	getTestResultByUuid,
 	createAnonymousTest,
 };

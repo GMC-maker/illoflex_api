@@ -1,0 +1,103 @@
+### Login admin interno
+POST http://localhost:3000/api/admin/login
+Content-Type: application/json
+
+{
+  "email": "admin@illoflex.local",
+  "password": "AdminIlloFlex2026!"
+}
+
+### Admin autenticado actual
+GET http://localhost:3000/api/admin/me
+
+### Listar familias profesionales
+GET http://localhost:3000/api/admin/familias
+
+### Crear familia profesional
+POST http://localhost:3000/api/admin/familias
+Content-Type: application/json
+
+{
+  "nombre": "Otra Familia de prueba",
+  "descripcion": "Descripcion de prueba para validar el CRUD admin de familias"
+}
+
+### Actualizar familia profesional
+PUT http://localhost:3000/api/admin/familias/1
+Content-Type: application/json
+
+{
+  "nombre": "Actividades Fisicas y Deportivas",
+  "descripcion": "Familia profesional actualizada desde el CRUD admin"
+}
+
+### Listar ciclos formativos
+GET http://localhost:3000/api/admin/ciclos
+
+### Crear ciclo formativo
+POST http://localhost:3000/api/admin/ciclos
+Content-Type: application/json
+
+{
+  "id_familia": 1,
+  "nombre": "Ciclo de prueba dos para eliminar",
+  "nivel": "GS",
+  "descripcion": "Ciclo de prueba para validar DELETE",
+  "duracion_horas": 2000
+}
+
+
+### Actualizar ciclo formativo
+PUT http://localhost:3000/api/admin/ciclos/1
+Content-Type: application/json
+
+{
+  "id_familia": 1,
+  "nombre": "Administracion de Sistemas Informaticos en Red",
+  "nivel": "GS",
+  "descripcion": "Ciclo actualizado desde el CRUD admin",
+  "duracion_horas": 2000
+}
+
+
+### Probar error por familia inexistente al crear ciclo
+POST http://localhost:3000/api/admin/ciclos
+Content-Type: application/json
+
+{
+  "id_familia": 9999,
+  "codigo_oficial": "ERR001",
+  "nombre": "Ciclo invalido",
+  "nivel": "Grado Superior",
+  "descripcion": "Debe fallar porque la familia no existe",
+  "duracion_horas": 2000
+}
+
+### Logout admin
+POST http://localhost:3000/api/admin/logout
+
+### Resumen del banco de preguntas activas
+GET http://localhost:3000/api/admin/preguntas/resumen
+
+
+### Inactivar una pregunta del test
+PATCH http://localhost:3000/api/admin/preguntas/18
+Content-Type: application/json
+
+{
+  "activa": false
+}
+
+### Reactivar una pregunta del test
+PATCH http://localhost:3000/api/admin/preguntas/18
+Content-Type: application/json
+
+{
+  "activa": true
+}
+
+### Eliminar ciclo formativo
+DELETE http://localhost:3000/api/admin/ciclos/88
+
+### Eliminar familia profesional
+DELETE http://localhost:3000/api/admin/familias/32
