@@ -1,24 +1,18 @@
 /**
- * Define las rutas HTTP minimas del area admin para autenticacion
+ * Son las rutas HTTP del area admin para autenticacion
  * y comprobacion del administrador autenticado.
  */
-
-// Crea el router de Express para agrupar rutas admin.
 const express = require("express");
+const router = express.Router();
 
 // Importa el controller que responde al login, al endpoint /me y al logout.
 const adminAuthController = require("../controllers/adminAuthController");
-
-// Importa el controller del CRUD minimo de familias profesionales.
 const adminFamiliaController = require("../controllers/adminFamiliaController");
-
-// Importa el controller del CRUD minimo de ciclos formativos.
 const adminCicloController = require("../controllers/adminCicloController");
+const adminPreguntaController = require("../controllers/adminPreguntaController");
 
 // Importa el middleware que valida la cookie del token admin.
 const authAdmin = require("../middlewares/authAdmin");
-
-const router = express.Router();
 
 // Permite iniciar sesion en el area interna con credenciales admin.
 router.post("/login", adminAuthController.loginAdmin);
@@ -32,22 +26,27 @@ router.get("/me", adminAuthController.getCurrentAdmin);
 // Cierra la sesion admin eliminando la cookie del token.
 router.post("/logout", adminAuthController.logoutAdmin);
 
-// Recupera todas las familias profesionales.
+// Recuperar, crear y actualizar las familias profesionales.
 router.get("/familias", adminFamiliaController.getAllFamilies);
-
-// Crea una nueva familia profesional.
 router.post("/familias", adminFamiliaController.createFamily);
-
-// Actualiza una familia profesional existente.
 router.put("/familias/:idFamilia", adminFamiliaController.updateFamily);
 
-// Recupera todos los ciclos formativos.
+// Recupera, crear y actualizar todos los ciclos formativos.
 router.get("/ciclos", adminCicloController.getAllCiclos);
-
-// Crea un nuevo ciclo formativo.
 router.post("/ciclos", adminCicloController.createCiclo);
-
-// Actualiza un ciclo formativo existente.
 router.put("/ciclos/:idCiclo", adminCicloController.updateCiclo);
+router.delete("/ciclos/:idCiclo", adminCicloController.deleteCiclo);
+
+// Recupera todas las preguntas del test con sus opciones asociadas.
+router.get("/preguntas", adminPreguntaController.getAllQuestions);
+
+// Recupera el resumen del banco activo de preguntas y dimensiones RIASEC.
+router.get("/preguntas/resumen", adminPreguntaController.getQuestionsSummary);
+
+// Activa o desactiva una pregunta existente y sincroniza sus opciones asociadas.
+router.patch("/preguntas/:idPregunta", adminPreguntaController.updateQuestionStatus);
+
+// Actualiza una pregunta existente con sus opciones asociadas.
+router.put("/preguntas/:idPregunta", adminPreguntaController.updateQuestion);
 
 module.exports = router;

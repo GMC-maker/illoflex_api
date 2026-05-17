@@ -70,9 +70,15 @@ const updateCiclo = async (
 	return ciclo;
 };
 
+// Elimina un ciclo formativo existente.
+const deleteCiclo = async (ciclo) => {
+	await ciclo.destroy();
+};
+
 module.exports = {
 	getAllCiclos,
 	getCicloById,
 	createCiclo,
 	updateCiclo,
+	deleteCiclo,
 };

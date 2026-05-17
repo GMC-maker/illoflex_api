@@ -53,11 +53,17 @@ const validateCicloData = (datosRecibidos) => {
 	}
 
 	if (!nombre) {
-		throw createServiceError("El nombre del ciclo formativo es obligatorio", 400);
+		throw createServiceError(
+			"El nombre del ciclo formativo es obligatorio",
+			400,
+		);
 	}
 
 	if (!nivel) {
-		throw createServiceError("El nivel del ciclo formativo es obligatorio", 400);
+		throw createServiceError(
+			"El nivel del ciclo formativo es obligatorio",
+			400,
+		);
 	}
 
 	if (
@@ -109,7 +115,8 @@ const findDuplicatedCiclo = (ciclos, cicloData, idCicloActual = null) => {
 
 		const sameNombreInFamilia =
 			ciclo.id_familia === cicloData.id_familia &&
-			ciclo.nombre.trim().toLowerCase() === cicloData.nombre.toLowerCase();
+			ciclo.nombre.trim().toLowerCase() ===
+				cicloData.nombre.toLowerCase();
 
 		return sameCodigoOficial || sameNombreInFamilia;
 	});
@@ -144,7 +151,9 @@ const createCiclo = async (datosRecibidos) => {
 	}
 
 	const createdCiclo = await cicloRepository.createCiclo(cicloData);
-	const savedCiclo = await cicloRepository.getCicloById(createdCiclo.id_ciclo);
+	const savedCiclo = await cicloRepository.getCicloById(
+		createdCiclo.id_ciclo,
+	);
 
 	return normalizeCicloResponse(savedCiclo);
 };
@@ -199,8 +208,26 @@ const updateCiclo = async (idCiclo, datosRecibidos) => {
 	return normalizeCicloResponse(updatedCiclo);
 };
 
+// Elimina un ciclo formativo existente.
+const deleteCiclo = async (idCiclo) => {
+	const cicloId = Number(idCiclo);
+
+	if (!Number.isInteger(cicloId)) {
+		throw createServiceError("El id de ciclo no es valido", 400);
+	}
+
+	const existingCiclo = await cicloRepository.getCicloById(cicloId);
+
+	if (!existingCiclo) {
+		throw createServiceError("Ciclo formativo no encontrado", 404);
+	}
+
+	await cicloRepository.deleteCiclo(existingCiclo);
+};
+
 module.exports = {
 	getAllCiclos,
 	createCiclo,
 	updateCiclo,
+	deleteCiclo,
 };

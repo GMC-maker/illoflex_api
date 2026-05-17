@@ -66,9 +66,28 @@ const updateCiclo = async (req, res) => {
 		});
 	}
 };
+// Elimina un ciclo formativo existente.
+const deleteCiclo = async (req, res) => {
+	try {
+		await adminCicloService.deleteCiclo(req.params.idCiclo);
+
+		return res.status(200).json({
+			ok: true,
+			datos: null,
+			mensaje: "Ciclo formativo eliminado correctamente",
+		});
+	} catch (error) {
+		return res.status(error.statusCode || 500).json({
+			ok: false,
+			datos: null,
+			mensaje: error.message || "No se pudo eliminar el ciclo formativo",
+		});
+	}
+};
 
 module.exports = {
 	getAllCiclos,
 	createCiclo,
 	updateCiclo,
+	deleteCiclo,
 };

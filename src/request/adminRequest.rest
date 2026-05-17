@@ -18,7 +18,7 @@ POST http://localhost:3000/api/admin/familias
 Content-Type: application/json
 
 {
-  "nombre": "Familia de prueba",
+  "nombre": "Otra Familia de prueba",
   "descripcion": "Descripcion de prueba para validar el CRUD admin de familias"
 }
 
@@ -40,9 +40,9 @@ Content-Type: application/json
 
 {
   "id_familia": 1,
-  "nombre": "Ciclo de prueba admin",
+  "nombre": "Ciclo de prueba dos para eliminar",
   "nivel": "GS",
-  "descripcion": "Ciclo de prueba para validar el CRUD admin",
+  "descripcion": "Ciclo de prueba para validar DELETE",
   "duracion_horas": 2000
 }
 
@@ -75,3 +75,26 @@ Content-Type: application/json
 
 ### Logout admin
 POST http://localhost:3000/api/admin/logout
+
+### Resumen del banco de preguntas activas
+GET http://localhost:3000/api/admin/preguntas/resumen
+
+
+### Inactivar una pregunta del test
+PATCH http://localhost:3000/api/admin/preguntas/18
+Content-Type: application/json
+
+{
+  "activa": false
+}
+
+### Reactivar una pregunta del test
+PATCH http://localhost:3000/api/admin/preguntas/18
+Content-Type: application/json
+
+{
+  "activa": true
+}
+
+### Eliminar ciclo formativo
+DELETE http://localhost:3000/api/admin/ciclos/88
