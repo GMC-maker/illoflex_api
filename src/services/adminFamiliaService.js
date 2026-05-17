@@ -3,6 +3,7 @@
  * profesionales del area admin.
  */
 const familiaRepository = require("../repositories/familiaRepository");
+const cicloRepository = require("../repositories/cicloRepository");
 
 // Crea errores de negocio con su codigo HTTP asociado.
 const createServiceError = (message, statusCode) => {
@@ -52,7 +53,8 @@ const createFamily = async (datosRecibidos) => {
 
 	const duplicatedFamily = existingFamilies.find((family) => {
 		return (
-			family.nombre.trim().toLowerCase() === familyData.nombre.toLowerCase()
+			family.nombre.trim().toLowerCase() ===
+			familyData.nombre.toLowerCase()
 		);
 	});
 
@@ -88,7 +90,8 @@ const updateFamily = async (idFamilia, datosRecibidos) => {
 	const duplicatedFamily = existingFamilies.find((family) => {
 		return (
 			family.id_familia !== familyId &&
-			family.nombre.trim().toLowerCase() === familyData.nombre.toLowerCase()
+			family.nombre.trim().toLowerCase() ===
+				familyData.nombre.toLowerCase()
 		);
 	});
 
@@ -107,8 +110,36 @@ const updateFamily = async (idFamilia, datosRecibidos) => {
 	return normalizeFamilyResponse(updatedFamily);
 };
 
+// Elimina una familia profesional existente.
+const deleteFamily = async (idFamilia) => {
+	const familyId = Number(idFamilia);
+
+	if (!Number.isInteger(familyId)) {
+		throw createServiceError("El id de familia no es valido", 400);
+	}
+
+	const existingFamily = await familiaRepository.getFamilyById(familyId);
+
+	if (!existingFamily) {
+		throw createServiceError("Familia profesional no encontrada", 404);
+	}
+
+	const associatedCiclos =
+		await cicloRepository.getCiclosByFamiliaId(familyId);
+
+	if (associatedCiclos.length > 0) {
+		throw createServiceError(
+			"No se puede eliminar la familia profesional porque todavia tiene ciclos formativos asociados",
+			409,
+		);
+	}
+
+	await familiaRepository.deleteFamily(existingFamily);
+};
+
 module.exports = {
 	getAllFamilies,
 	createFamily,
 	updateFamily,
+	deleteFamily,
 };

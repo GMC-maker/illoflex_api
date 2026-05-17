@@ -34,6 +34,14 @@ const getCicloById = async (idCiclo) => {
 	});
 };
 
+// Recupera los ciclos asociados a una familia profesional.
+const getCiclosByFamiliaId = async (idFamilia) => {
+	return CicloFormativo.findAll({
+		where: { id_familia: idFamilia },
+		order: [["nombre", "ASC"]],
+	});
+};
+
 // Crea un nuevo ciclo formativo en la base de datos.
 const createCiclo = async ({
 	id_familia,
@@ -78,6 +86,7 @@ const deleteCiclo = async (ciclo) => {
 module.exports = {
 	getAllCiclos,
 	getCicloById,
+	getCiclosByFamiliaId,
 	createCiclo,
 	updateCiclo,
 	deleteCiclo,

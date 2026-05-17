@@ -67,8 +67,29 @@ const updateFamily = async (req, res) => {
 	}
 };
 
+// Elimina una familia profesional existente.
+const deleteFamily = async (req, res) => {
+	try {
+		await adminFamiliaService.deleteFamily(req.params.idFamilia);
+
+		return res.status(200).json({
+			ok: true,
+			datos: null,
+			mensaje: "Familia profesional eliminada correctamente",
+		});
+	} catch (error) {
+		return res.status(error.statusCode || 500).json({
+			ok: false,
+			datos: null,
+			mensaje:
+				error.message || "No se pudo eliminar la familia profesional",
+		});
+	}
+};
+
 module.exports = {
 	getAllFamilies,
 	createFamily,
 	updateFamily,
+	deleteFamily,
 };

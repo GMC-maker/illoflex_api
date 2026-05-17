@@ -98,3 +98,6 @@ Content-Type: application/json
 
 ### Eliminar ciclo formativo
 DELETE http://localhost:3000/api/admin/ciclos/88
+
+### Eliminar familia profesional
+DELETE http://localhost:3000/api/admin/familias/32

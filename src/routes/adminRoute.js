@@ -30,6 +30,7 @@ router.post("/logout", adminAuthController.logoutAdmin);
 router.get("/familias", adminFamiliaController.getAllFamilies);
 router.post("/familias", adminFamiliaController.createFamily);
 router.put("/familias/:idFamilia", adminFamiliaController.updateFamily);
+router.delete("/familias/:idFamilia", adminFamiliaController.deleteFamily);
 
 // Recupera, crear y actualizar todos los ciclos formativos.
 router.get("/ciclos", adminCicloController.getAllCiclos);
