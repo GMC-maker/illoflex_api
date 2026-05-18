@@ -1,0 +1,39 @@
+services:
+    db:
+        image: mysql:8.0
+        container_name: illoflex-db
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: illoflex
+            MYSQL_ROOT_PASSWORD: illoflex2026
+        ports:
+            - "3307:3306"
+        volumes:
+            - illoflex_mysql_data:/var/lib/mysql
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin:latest
+        container_name: illoflex-phpmyadmin
+        restart: unless-stopped
+        environment:
+            PMA_HOST: db
+            PMA_USER: root
+            PMA_PASSWORD: illoflex2026
+        ports:
+            - "8080:80"
+        depends_on:
+            - db
+
+    api:
+        build: .
+        container_name: illoflex-api
+        restart: unless-stopped
+        env_file:
+            - .env.production
+        ports:
+            - "3001:3000"
+        depends_on:
+            - db
+
+volumes:
+    illoflex_mysql_data:
