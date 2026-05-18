@@ -61,6 +61,7 @@ const loginAdmin = async (req, res) => {
 			ok: true,
 			datos: {
 				admin: loginResult.admin,
+				token: loginResult.token,
 			},
 			mensaje: "Login admin correcto",
 		});

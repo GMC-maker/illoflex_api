@@ -12,13 +12,29 @@ const config = require("../config/config");
 // Nombre de la cookie donde esperamos recibir el token del admin.
 const ADMIN_COOKIE_NAME = "admin_token";
 
+// Extrae el JWT priorizando Authorization Bearer y manteniendo la cookie como fallback.
+const getAdminTokenFromRequest = (req) => {
+	const authorizationHeader = req.get("authorization") || "";
+
+	if (authorizationHeader.startsWith("Bearer ")) {
+		const bearerToken = authorizationHeader.slice("Bearer ".length).trim();
+
+		if (bearerToken) {
+			return bearerToken;
+		}
+	}
+
+	// La cookie sigue soportada para localhost y futuros despliegues con HTTPS.
+	return req.cookies?.[ADMIN_COOKIE_NAME];
+};
+
 // Middleware que protege rutas admin comprobando la cookie del token.
 const authAdmin = (req, res, next) => {
 	try {
-		// Lee el token JWT desde la cookie enviada por el navegador.
-		const token = req.cookies?.[ADMIN_COOKIE_NAME];
+		// Lee el token JWT priorizando Bearer y usando cookie como compatibilidad.
+		const token = getAdminTokenFromRequest(req);
 
-		// Si no existe la cookie, corta la peticion con 401.
+		// Si no existe el token en ninguna via soportada, corta la peticion con 401.
 		if (!token) {
 			return res.status(401).json({
 				ok: false,
