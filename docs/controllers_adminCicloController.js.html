@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: controllers/adminCicloController.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: controllers/adminCicloController.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Recibe las peticiones HTTP del CRUD minimo de ciclos
+ * formativos del area admin.
+ */
+const adminCicloService = require("../services/adminCicloService");
+
+// Devuelve todos los ciclos formativos.
+const getAllCiclos = async (req, res) => {
+	try {
+		const ciclos = await adminCicloService.getAllCiclos();
+
+		return res.status(200).json({
+			ok: true,
+			datos: ciclos,
+			mensaje: "Ciclos formativos recuperados correctamente",
+		});
+	} catch (error) {
+		return res.status(error.statusCode || 500).json({
+			ok: false,
+			datos: null,
+			mensaje:
+				error.message ||
+				"No se pudieron recuperar los ciclos formativos",
+		});
+	}
+};
+
+// Crea un nuevo ciclo formativo.
+const createCiclo = async (req, res) => {
+	try {
+		const createdCiclo = await adminCicloService.createCiclo(req.body);
+
+		return res.status(201).json({
+			ok: true,
+			datos: createdCiclo,
+			mensaje: "Ciclo formativo creado correctamente",
+		});
+	} catch (error) {
+		return res.status(error.statusCode || 500).json({
+			ok: false,
+			datos: null,
+			mensaje: error.message || "No se pudo crear el ciclo formativo",
+		});
+	}
+};
+
+// Actualiza un ciclo formativo existente.
+const updateCiclo = async (req, res) => {
+	try {
+		const updatedCiclo = await adminCicloService.updateCiclo(
+			req.params.idCiclo,
+			req.body,
+		);
+
+		return res.status(200).json({
+			ok: true,
+			datos: updatedCiclo,
+			mensaje: "Ciclo formativo actualizado correctamente",
+		});
+	} catch (error) {
+		return res.status(error.statusCode || 500).json({
+			ok: false,
+			datos: null,
+			mensaje:
+				error.message || "No se pudo actualizar el ciclo formativo",
+		});
+	}
+};
+// Elimina un ciclo formativo existente.
+const deleteCiclo = async (req, res) => {
+	try {
+		await adminCicloService.deleteCiclo(req.params.idCiclo);
+
+		return res.status(200).json({
+			ok: true,
+			datos: null,
+			mensaje: "Ciclo formativo eliminado correctamente",
+		});
+	} catch (error) {
+		return res.status(error.statusCode || 500).json({
+			ok: false,
+			datos: null,
+			mensaje: error.message || "No se pudo eliminar el ciclo formativo",
+		});
+	}
+};
+
+module.exports = {
+	getAllCiclos,
+	createCiclo,
+	updateCiclo,
+	deleteCiclo,
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#adminCicloService">adminCicloService</a></li><li><a href="global.html#adminFamiliaService">adminFamiliaService</a></li><li><a href="global.html#adminPreguntaService">adminPreguntaService</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#buildGroupedRecommendations">buildGroupedRecommendations</a></li><li><a href="global.html#buildRecoveredResultResponse">buildRecoveredResultResponse</a></li><li><a href="global.html#calculateAndRankProfiles">calculateAndRankProfiles</a></li><li><a href="global.html#cicloRepository">cicloRepository</a></li><li><a href="global.html#completeTestGenerateResult">completeTestGenerateResult</a></li><li><a href="global.html#createAnonymousTest">createAnonymousTest</a></li><li><a href="global.html#createCiclo">createCiclo</a></li><li><a href="global.html#createFamily">createFamily</a></li><li><a href="global.html#createTemporaryResultLink">createTemporaryResultLink</a></li><li><a href="global.html#createTestResponse">createTestResponse</a></li><li><a href="global.html#crypto">crypto</a></li><li><a href="global.html#deleteCiclo">deleteCiclo</a></li><li><a href="global.html#deleteFamily">deleteFamily</a></li><li><a href="global.html#enlaceResultadoService">enlaceResultadoService</a></li><li><a href="global.html#express">express</a></li><li><a href="global.html#familiaRepository">familiaRepository</a></li><li><a href="global.html#getAllCiclos">getAllCiclos</a></li><li><a href="global.html#getAllFamilies">getAllFamilies</a></li><li><a href="global.html#getAllQuestions">getAllQuestions</a></li><li><a href="global.html#getQuestionsSummary">getQuestionsSummary</a></li><li><a href="global.html#getResultByTemporaryToken">getResultByTemporaryToken</a></li><li><a href="global.html#getTestByUuid">getTestByUuid</a></li><li><a href="global.html#getTestQuestions">getTestQuestions</a></li><li><a href="global.html#getTestResponses">getTestResponses</a></li><li><a href="global.html#getTestResultByUuid">getTestResultByUuid</a></li><li><a href="global.html#mysql">mysql</a></li><li><a href="global.html#path">path</a></li><li><a href="global.html#sequelize">sequelize</a></li><li><a href="global.html#testService">testService</a></li><li><a href="global.html#updateCiclo">updateCiclo</a></li><li><a href="global.html#updateFamily">updateFamily</a></li><li><a href="global.html#updateQuestion">updateQuestion</a></li><li><a href="global.html#updateQuestionStatus">updateQuestionStatus</a></li><li><a href="global.html#updateTestResponse">updateTestResponse</a></li><li><a href="global.html#verifyPreguntaDimension">verifyPreguntaDimension</a></li><li><a href="global.html#verifyPreguntaStatus">verifyPreguntaStatus</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon May 18 2026 00:40:38 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
